@@ -1,7 +1,15 @@
-
+.movesTextBox{
+    height: 75%;
+    width: 160px;
+    position: fixed;
+    z-index: 1;
+    overflow-x: hidden;
+    padding-top: 40px;
+    border: 0;
+}
 
 .colorSelector {
-    height: 75%;
+    /* height: 75%; */
     width: 160px;
     position: fixed;
     z-index: 1;

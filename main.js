@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-
+import { generateMovesPlacement } from './cubestate';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
 
@@ -35,18 +35,16 @@ var Cube = function Cube(order) {
 	this.createPieces = function () {
 
 		//Start from -n/2 to n/2 ?
-		for (var i = 0; i < _this.order; i++) {
-			for (var j = 0; j < _this.order; j++) {
-				for (var k = 0; k < _this.order; k++) {
+		for (var i = 0; i < _this.cubeSize; i++) {
+			for (var j = 0; j < _this.cubeSize; j++) {
+				for (var k = 0; k < _this.cubeSize; k++) {
 					var gap = 1.05;
+					// var gap = 1.50; for testing purposes
 					var stickerProjection = 0.10;
 					var geometryBox = new THREE.BoxGeometry(_this.pieceSize, _this.pieceSize, _this.pieceSize);
 					var geometryFace = new THREE.PlaneGeometry(_this.pieceSize * 0.85, _this.pieceSize * 0.85);
 
-
-
 					//Placed Here to allow for new instances of each material.
-
 					var stickerU = new THREE.MeshBasicMaterial({
 						color: 0xf0e442,
 						side: THREE.DoubleSide
@@ -127,28 +125,34 @@ var Cube = function Cube(order) {
 					box.position.set(x * gap, y * gap, z * gap);
 					var pieceGroup = new THREE.Object3D();
 
-					if (i == 0 || j == 0 || k == 0 || i == _this.order - 1 || j == _this.order - 1 || k == _this.order - 1) {
-						if (i == _this.order - 1) {
+					if (i == 0 || j == 0 || k == 0 || i == _this.cubeSize - 1 || j == _this.cubeSize - 1 || k == _this.cubeSize - 1) {
+						if (i == _this.cubeSize - 1) {
+							faceR.name = "R" + ((((_this.cubeSize * _this.cubeSize) - k) - (_this.cubeSize * j)) - 1);
 							pieceGroup.add(faceR);
 							objects.push(faceR);
 						}
 						if (i == 0) {
+							faceL.name = "L" + ((_this.cubeSize * (_this.cubeSize - 1) + k) - (_this.cubeSize * j));
 							pieceGroup.add(faceL);
 							objects.push(faceL);
 						}
-						if (j == _this.order - 1) {
+						if (j == _this.cubeSize - 1) {
+							faceU.name = "U" + ((_this.cubeSize * k) + i);
 							pieceGroup.add(faceU);
 							objects.push(faceU);
 						}
 						if (j == 0) {
+							faceD.name = "D" + ((_this.cubeSize * (_this.cubeSize - k - 1)) + i);
 							pieceGroup.add(faceD);
 							objects.push(faceD);
 						}
-						if (k == _this.order - 1) {
+						if (k == _this.cubeSize - 1) {
+							faceF.name = "F" + ((_this.cubeSize * (_this.cubeSize - j - 1)) + i);
 							pieceGroup.add(faceF);
 							objects.push(faceF);
 						}
 						if (k == 0) {
+							faceB.name = "B" + ((_this.cubeSize * (_this.cubeSize - j) - i) - 1);
 							pieceGroup.add(faceB);
 							objects.push(faceB);
 						}
@@ -173,10 +177,8 @@ var Cube = function Cube(order) {
 
 	this.pieceSize = 10;
 	this.offset = 5;
-	this.order = order;
+	this.cubeSize = order;
 	this.createPieces();
-
-
 }
 
 
@@ -184,8 +186,45 @@ var selectedColor = 0xf0e442;
 // var cubeSize = 3;
 // var cube = new Cube(cubeSize);
 // console.log(objects)
-createCube(5);
+createCube(4);
 animate();
+// onTextInputApplySticker("B");
+
+
+
+
+function onTextInputApplySticker(string){
+	console.log("Text Applied")
+	let moves = generateMovesPlacement(string);
+	// console.log(moves["U1"])
+	
+	for(var i in moves){
+		let stickerLetter = i.replace(/[0-9]/g, '');
+		let addColor = scene.getObjectByName(moves[i]);
+		// let addColor = scene.getObjectByName(i);
+		console.log(addColor)
+		switch(stickerLetter){
+			case "U":
+				addColor.material.color.setHex("0xf0e442")
+				break;
+			case "D":
+				addColor.material.color.setHex("0xffffff")
+				break;
+			case "L":
+				addColor.material.color.setHex("0xcc79a7")
+				break;
+			case "R":
+				addColor.material.color.setHex("0xd55e00")
+				break;
+			case "F":
+				addColor.material.color.setHex("0x56b4e9")
+				break;
+			case "B":
+				addColor.material.color.setHex("0x009e73")
+				break;
+		}
+	}
+}
 
 
 
@@ -245,6 +284,7 @@ function onPointerDown(event) {
 		const intersect = intersects[0];
 
 		console.log(intersect)
+		console.log(intersect.object.name)
 		intersect.object.material.color.setHex(selectedColor);
 		render();
 
@@ -268,3 +308,11 @@ $(".dropdown-menu").on('click', '.dropdown-item', function(e) {
     console.log(menu);
 });
 
+
+$("#applySticker").submit(function(e){
+	console.log("applyStickering");
+	e.preventDefault(); // Prevents loading page
+	var text = document.getElementById("textboxID").value;
+	console.log(text);
+	onTextInputApplySticker(text);
+})
