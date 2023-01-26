@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement } from './cubestate';
+import { generateMovesPlacement, generateCubeState } from './cubestate';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
 
@@ -10,7 +10,7 @@ camera.position.set(45, 45, 45);
 let pointer, raycaster;
 raycaster = new THREE.Raycaster();
 pointer = new THREE.Vector2();
-const objects = [];
+let objects = []; //objects to store and remove all objects/meshs for new cube
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -38,13 +38,15 @@ var Cube = function Cube(order) {
 		for (var i = 0; i < _this.cubeSize; i++) {
 			for (var j = 0; j < _this.cubeSize; j++) {
 				for (var k = 0; k < _this.cubeSize; k++) {
+					// gap used to offset each cube piece from each other
 					var gap = 1.05;
 					// var gap = 1.50; for testing purposes
+					// Project sticker outward from cube piece 
 					var stickerProjection = 0.10;
 					var geometryBox = new THREE.BoxGeometry(_this.pieceSize, _this.pieceSize, _this.pieceSize);
 					var geometryFace = new THREE.PlaneGeometry(_this.pieceSize * 0.85, _this.pieceSize * 0.85);
 
-					//Placed Here to allow for new instances of each material.
+					// Placed Here to allow for new unique instances of each material for each unique sticker.
 					var stickerU = new THREE.MeshBasicMaterial({
 						color: 0xf0e442,
 						side: THREE.DoubleSide
@@ -182,20 +184,21 @@ var Cube = function Cube(order) {
 }
 
 
+
+
+
 var selectedColor = 0xf0e442;
-// var cubeSize = 3;
+var cubeSize = 4;
 // var cube = new Cube(cubeSize);
 // console.log(objects)
-createCube(4);
-animate();
-// onTextInputApplySticker("B");
+createCube(cubeSize);
 
 
 
 
-function onTextInputApplySticker(string){
+function onTextInputApplySticker(string, cubeSize){
 	console.log("Text Applied")
-	let moves = generateMovesPlacement(string);
+	let moves = generateMovesPlacement(string, cubeSize);
 	// console.log(moves["U1"])
 	
 	for(var i in moves){
@@ -228,10 +231,31 @@ function onTextInputApplySticker(string){
 
 
 
-
 function createCube(cubeSize){
+	//Set objects to [] to clear references to previous cube meshes
+	objects = []
+
+	renderer.dispose()
+	scene.traverse(object => {
+		if (!object.isMesh) return
+		object.geometry.dispose()
+
+		if (object.material.isMaterial) {
+			object.material.dispose()
+		} else {
+			// an array of materials
+			for (const material of object.material) {
+				material.dispose()
+			}
+		}
+	})
+	scene.remove.apply(scene, scene.children);
+
 	var cube = new Cube(cubeSize);
 	updateControls(cubeSize);
+	animate();
+	console.log(renderer.info)
+
 }
 //Center rotation on cube center, add axes for visual
 function updateControls(cubeSize) {
@@ -305,7 +329,9 @@ $(".button").click(function () {
 
 $(".dropdown-menu").on('click', '.dropdown-item', function(e) { 
     var menu = $(this).val();
-    console.log(menu);
+	createCube(menu);
+	generateCubeState(menu);
+	cubeSize = menu;
 });
 
 
@@ -314,5 +340,5 @@ $("#applySticker").submit(function(e){
 	e.preventDefault(); // Prevents loading page
 	var text = document.getElementById("textboxID").value;
 	console.log(text);
-	onTextInputApplySticker(text);
+	onTextInputApplySticker(text, cubeSize);
 })
