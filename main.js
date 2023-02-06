@@ -235,6 +235,7 @@ function createCube(cubeSize){
 	//Set objects to [] to clear references to previous cube meshes
 	objects = []
 
+	//Remove current cube
 	renderer.dispose()
 	scene.traverse(object => {
 		if (!object.isMesh) return
@@ -342,3 +343,11 @@ $("#applySticker").submit(function(e){
 	console.log(text);
 	onTextInputApplySticker(text, cubeSize);
 })
+
+const colorSelector = document.querySelector('.colorSelector')
+
+const handle = colorSelector.querySelector('.handle')
+
+handle.onclick = function() {
+	colorSelector.classList.toggle('active');
+  }
