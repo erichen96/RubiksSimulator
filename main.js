@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState } from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState } from './cubestate';
+import { userInputToCube } from './cubejs';
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
 
@@ -162,7 +164,8 @@ var Cube = function Cube(order) {
 						// pieceGroup.position.set(x, y, z);
 						pieceGroup.name = '' + i + j + k;
 						scene.add(pieceGroup);
-						console.log(pieceGroup)
+						// print each pieces
+						// console.log(pieceGroup)
 						objects.push(pieceGroup);
 						// camera.lookAt(pieceGroup.position);
 					}
@@ -183,30 +186,45 @@ var Cube = function Cube(order) {
 	this.createPieces();
 }
 
-
-
-
-
-var selectedColor = 0xf0e442;
-var cubeSize = 4;
-// var cube = new Cube(cubeSize);
-// console.log(objects)
-createCube(cubeSize);
-
-
-
-
-function onTextInputApplySticker(string, cubeSize){
+function onTextInputApplySticker(string, cubeSize) {
 	console.log("Text Applied")
 	let moves = generateMovesPlacement(string, cubeSize);
 	// console.log(moves["U1"])
-	
-	for(var i in moves){
+
+	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
 		let addColor = scene.getObjectByName(moves[i]);
 		// let addColor = scene.getObjectByName(i);
-		console.log(addColor)
-		switch(stickerLetter){
+		// console.log(addColor)
+		switch (stickerLetter) {
+			case "U":
+				addColor.material.color.setHex("0xf0e442")
+				break;
+			case "D":
+				addColor.material.color.setHex("0xffffff")
+				break;
+			case "L":
+				addColor.material.color.setHex("0xcc79a7")
+				break;
+			case "R":
+				addColor.material.color.setHex("0xd55e00")
+				break;
+			case "F":
+				addColor.material.color.setHex("0x56b4e9")
+				break;
+			case "B":
+				addColor.material.color.setHex("0x009e73")
+				break;
+		}
+	}
+}
+
+function onTextSolveSticker(string, cubeSize){
+	let moves = applyState(string, cubeSize);
+	for (var i in moves) {
+		let stickerLetter = i.replace(/[0-9]/g, '');
+		let addColor = scene.getObjectByName(moves[i]);
+		switch (stickerLetter) {
 			case "U":
 				addColor.material.color.setHex("0xf0e442")
 				break;
@@ -230,8 +248,7 @@ function onTextInputApplySticker(string, cubeSize){
 }
 
 
-
-function createCube(cubeSize){
+function createCube(cubeSize) {
 	//Set objects to [] to clear references to previous cube meshes
 	objects = []
 
@@ -255,10 +272,10 @@ function createCube(cubeSize){
 	var cube = new Cube(cubeSize);
 	updateControls(cubeSize);
 	animate();
-	console.log(renderer.info)
+	// console.log(renderer.info)
 
 }
-//Center rotation on cube center, add axes for visual
+//Center rotation on cube center, add axes for visual, range of camera from center
 function updateControls(cubeSize) {
 	var centerPos = (cubeSize - 2) * 5.15;
 	controls.target = new THREE.Vector3(centerPos, centerPos, centerPos);
@@ -328,26 +345,55 @@ $(".button").click(function () {
 })
 
 
-$(".dropdown-menu").on('click', '.dropdown-item', function(e) { 
-    var menu = $(this).val();
+$(".dropdown-menu").on('click', '.dropdown-item', function (e) {
+	var menu = $(this).val();
 	createCube(menu);
 	generateCubeState(menu);
 	cubeSize = menu;
 });
 
 
-$("#applySticker").submit(function(e){
+$("#applySticker").submit(function (e) {
 	console.log("applyStickering");
 	e.preventDefault(); // Prevents loading page
 	var text = document.getElementById("textboxID").value;
 	console.log(text);
 	onTextInputApplySticker(text, cubeSize);
+	// console.log(userInputToCube(text))
+	// onTextInputApplySticker(userInputToCube(text), cubeSize);
+
+	//Append to text box
+	moveTextArea.val(moveTextArea.val() + '\n' + text);
+
 })
 
+$("#fixSticker").submit(function (e) {
+	console.log("Solution");
+	e.preventDefault();
+	var text = document.getElementById("textboxID").value;
+	var KociembaSolution = userInputToCube(generateKociembaStateToString(text, cubeSize))
+	console.log(KociembaSolution)
+	onTextSolveSticker(KociembaSolution, cubeSize);
+
+	moveTextArea.val(moveTextArea.val() + '\n' + KociembaSolution);
+
+	
+})
+
+// Handle for user to change colorSelector activeColor
 const colorSelector = document.querySelector('.colorSelector')
-
 const handle = colorSelector.querySelector('.handle')
-
-handle.onclick = function() {
+handle.onclick = function () {
 	colorSelector.classList.toggle('active');
-  }
+}
+
+
+
+
+
+var selectedColor = 0xf0e442;
+var cubeSize = 5;
+var moveTextArea= $('#textarea');
+
+createCube(cubeSize);
+generateCubeState(cubeSize);
