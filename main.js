@@ -40,9 +40,6 @@ var Cube = function Cube(order) {
 		for (var i = 0; i < _this.cubeSize; i++) {
 			for (var j = 0; j < _this.cubeSize; j++) {
 				for (var k = 0; k < _this.cubeSize; k++) {
-					// gap used to offset each cube piece from each other
-					var gap = 1.05;
-					// var gap = 1.50; for testing purposes
 					// Project sticker outward from cube piece 
 					var stickerProjection = 0.10;
 					var geometryBox = new THREE.BoxGeometry(_this.pieceSize, _this.pieceSize, _this.pieceSize);
@@ -116,17 +113,17 @@ var Cube = function Cube(order) {
 					faceR.rotation.set(0, degree(90), 0);
 
 
-					var x = i * this.pieceSize - this.offset;
-					var y = j * this.pieceSize - this.offset;
-					var z = k * this.pieceSize - this.offset;
+					var x = i * this.pieceSize;
+					var y = j * this.pieceSize;
+					var z = k * this.pieceSize;
 
-					faceU.position.set(x * gap, y * gap + (_this.pieceSize / 2 + stickerProjection), z * gap);
-					faceD.position.set(x * gap, y * gap - (_this.pieceSize / 2 + stickerProjection), z * gap);
-					faceB.position.set(x * gap, y * gap, z * gap - (_this.pieceSize / 2 + stickerProjection));
-					faceF.position.set(x * gap, y * gap, z * gap + (_this.pieceSize / 2 + stickerProjection));
-					faceL.position.set(x * gap - (_this.pieceSize / 2 + stickerProjection), y * gap, z * gap);
-					faceR.position.set(x * gap + (_this.pieceSize / 2 + stickerProjection), y * gap, z * gap);
-					box.position.set(x * gap, y * gap, z * gap);
+					faceU.position.set(x, y + (_this.pieceSize / 2 + stickerProjection), z);
+					faceD.position.set(x, y - (_this.pieceSize / 2 + stickerProjection), z);
+					faceB.position.set(x, y, z  - (_this.pieceSize / 2 + stickerProjection));
+					faceF.position.set(x, y, z  + (_this.pieceSize / 2 + stickerProjection));
+					faceL.position.set(x - (_this.pieceSize / 2 + stickerProjection), y, z);
+					faceR.position.set(x + (_this.pieceSize / 2 + stickerProjection), y, z);
+					box.position.set(x, y, z);
 					var pieceGroup = new THREE.Object3D();
 
 					if (i == 0 || j == 0 || k == 0 || i == _this.cubeSize - 1 || j == _this.cubeSize - 1 || k == _this.cubeSize - 1) {
@@ -162,6 +159,9 @@ var Cube = function Cube(order) {
 						}
 						pieceGroup.add(box);
 						// pieceGroup.position.set(x, y, z);
+						//Set positions for rotations
+						pieceGroup.position.set(i, j, k);
+
 						pieceGroup.name = '' + i + j + k;
 						scene.add(pieceGroup);
 						// print each pieces
@@ -170,7 +170,6 @@ var Cube = function Cube(order) {
 						// camera.lookAt(pieceGroup.position);
 					}
 
-					//   _this.blocks[i][j][k].piece = pieceGroup;
 
 				}
 			}
@@ -181,7 +180,6 @@ var Cube = function Cube(order) {
 	}
 
 	this.pieceSize = 10;
-	this.offset = 5;
 	this.cubeSize = order;
 	this.createPieces();
 }
@@ -277,11 +275,12 @@ function createCube(cubeSize) {
 }
 //Center rotation on cube center, add axes for visual, range of camera from center
 function updateControls(cubeSize) {
-	var centerPos = (cubeSize - 2) * 5.15;
+	var centerPos = (cubeSize - 1.55) * 5.15;
 	controls.target = new THREE.Vector3(centerPos, centerPos, centerPos);
 	controls.minDistance = cubeSize * 20;
 	controls.maxDistance = cubeSize * 25;
 	const axes = new THREE.AxesHelper(100);
+	var centerPos = (cubeSize - 1) * 5.5; 
 	axes.position.set(centerPos, centerPos, centerPos);
 	scene.add(axes)
 	controls.update();
@@ -388,6 +387,65 @@ handle.onclick = function () {
 }
 
 
+$("#rotateButton").click(function () {
+	//Test Button
+	console.log('rotateButton Pressed');
+	var pivot = new THREE.Object3D(),
+	activeGroup = [];
+	var centerPos = (cubeSize - 1) * 5.5; 
+	pivot.position.set(centerPos, centerPos, centerPos)
+	pivot.rotation.set(0,0,0);
+
+	var total = 0;
+	console.log(objects);
+	objects.forEach(function(cubelet){
+		console.log(cubelet);
+		total = total + 1;
+	})
+	console.log(total);
+	var picked = 0;
+	objects.forEach(function(cubelet){
+		if(cubelet.position.y == 2){
+			activeGroup.push(cubelet);
+			console.log(cubelet.position);
+			picked = picked + 1;
+		}
+	})
+	console.log(picked);
+
+	for(var i in activeGroup){
+		pivot.attach(activeGroup[i])
+	}
+	console.log(pivot)
+
+	pivot.rotation.y = Math.PI / 2;
+
+
+	pivot.updateMatrixWorld();
+
+	for ( var i in activeGroup ) {
+    	scene.attach( activeGroup[ i ] );
+	}
+	// console.log(pivot)
+	// pivot.rotation.x
+	// animateGroup(t, pivot)
+	
+
+})
+
+// let fps = 60;
+// let tau = 2;
+// const step = 1/ (tau * fps);
+// const finalAngle = Math.PI/2;
+// const angleStep = finalAngle * step;
+// let t = 0;
+
+// function animateGroup(t, pivot){
+// 	if (t >= 1) return;
+// 	t += step;
+// 	pivot.rotation.x += angleStep;
+// 	requestAnimationFrame(() => animateGroup(t, pivot));
+// }
 
 
 
