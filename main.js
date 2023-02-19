@@ -6,17 +6,21 @@ import { userInputToCube } from './cubejs';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(45, 45, 45);
-
 let pointer, raycaster;
 raycaster = new THREE.Raycaster();
 pointer = new THREE.Vector2();
 let objects = []; //objects to store and remove all objects/meshs for new cube
+let stickerObjects = []; //object to store all stickers only
 
+var container = document.getElementById('cubeDisplay');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+var w = container.offsetWidth;
+var h = container.offsetHeight;
+renderer.setSize(w, h);
+
+const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+camera.position.set(45, 45, 45);
+document.getElementById("cubeDisplay").appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
@@ -119,8 +123,8 @@ var Cube = function Cube(order) {
 
 					faceU.position.set(x, y + (_this.pieceSize / 2 + stickerProjection), z);
 					faceD.position.set(x, y - (_this.pieceSize / 2 + stickerProjection), z);
-					faceB.position.set(x, y, z  - (_this.pieceSize / 2 + stickerProjection));
-					faceF.position.set(x, y, z  + (_this.pieceSize / 2 + stickerProjection));
+					faceB.position.set(x, y, z - (_this.pieceSize / 2 + stickerProjection));
+					faceF.position.set(x, y, z + (_this.pieceSize / 2 + stickerProjection));
 					faceL.position.set(x - (_this.pieceSize / 2 + stickerProjection), y, z);
 					faceR.position.set(x + (_this.pieceSize / 2 + stickerProjection), y, z);
 					box.position.set(x, y, z);
@@ -130,32 +134,32 @@ var Cube = function Cube(order) {
 						if (i == _this.cubeSize - 1) {
 							faceR.name = "R" + ((((_this.cubeSize * _this.cubeSize) - k) - (_this.cubeSize * j)) - 1);
 							pieceGroup.add(faceR);
-							objects.push(faceR);
+							stickerObjects.push(faceR);
 						}
 						if (i == 0) {
 							faceL.name = "L" + ((_this.cubeSize * (_this.cubeSize - 1) + k) - (_this.cubeSize * j));
 							pieceGroup.add(faceL);
-							objects.push(faceL);
+							stickerObjects.push(faceL);
 						}
 						if (j == _this.cubeSize - 1) {
 							faceU.name = "U" + ((_this.cubeSize * k) + i);
 							pieceGroup.add(faceU);
-							objects.push(faceU);
+							stickerObjects.push(faceU);
 						}
 						if (j == 0) {
 							faceD.name = "D" + ((_this.cubeSize * (_this.cubeSize - k - 1)) + i);
 							pieceGroup.add(faceD);
-							objects.push(faceD);
+							stickerObjects.push(faceD);
 						}
 						if (k == _this.cubeSize - 1) {
 							faceF.name = "F" + ((_this.cubeSize * (_this.cubeSize - j - 1)) + i);
 							pieceGroup.add(faceF);
-							objects.push(faceF);
+							stickerObjects.push(faceF);
 						}
 						if (k == 0) {
 							faceB.name = "B" + ((_this.cubeSize * (_this.cubeSize - j) - i) - 1);
 							pieceGroup.add(faceB);
-							objects.push(faceB);
+							stickerObjects.push(faceB);
 						}
 						pieceGroup.add(box);
 						// pieceGroup.position.set(x, y, z);
@@ -217,7 +221,7 @@ function onTextInputApplySticker(string, cubeSize) {
 	}
 }
 
-function onTextSolveSticker(string, cubeSize){
+function onTextSolveSticker(string, cubeSize) {
 	let moves = applyState(string, cubeSize);
 	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
@@ -248,8 +252,8 @@ function onTextSolveSticker(string, cubeSize){
 
 function createCube(cubeSize) {
 	//Set objects to [] to clear references to previous cube meshes
-	objects = []
-
+	objects = [];
+	stickerObjects = [];
 	//Remove current cube
 	renderer.dispose()
 	scene.traverse(object => {
@@ -280,7 +284,7 @@ function updateControls(cubeSize) {
 	controls.minDistance = cubeSize * 20;
 	controls.maxDistance = cubeSize * 25;
 	const axes = new THREE.AxesHelper(100);
-	var centerPos = (cubeSize - 1) * 5.5; 
+	var centerPos = (cubeSize - 1) * 5.5;
 	axes.position.set(centerPos, centerPos, centerPos);
 	scene.add(axes)
 	controls.update();
@@ -299,12 +303,9 @@ function render() {
 }
 
 function onWindowResize() {
-
-	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
-
-	renderer.setSize(window.innerWidth, window.innerHeight);
-
+	renderer.setSize(w, h);
 }
 
 
@@ -314,11 +315,11 @@ function onPointerDown(event) {
 	pointer.x = ((event.clientX - renderer.domElement.offsetLeft) / renderer.domElement.clientWidth) * 2 - 1;
 	pointer.y = - ((event.clientY - renderer.domElement.offsetTop) / renderer.domElement.clientHeight) * 2 + 1;
 
-	pointer.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
+	pointer.set((event.clientX / w) * 2 - 1, - (event.clientY / h) * 2 + 1);
 
 	raycaster.setFromCamera(pointer, camera);
 
-	const intersects = raycaster.intersectObjects(objects, false);
+	const intersects = raycaster.intersectObjects(stickerObjects, false);
 
 	if (intersects.length > 0) {
 
@@ -376,7 +377,7 @@ $("#fixSticker").submit(function (e) {
 
 	moveTextArea.val(moveTextArea.val() + '\n' + KociembaSolution);
 
-	
+
 })
 
 // Handle for user to change colorSelector activeColor
@@ -391,48 +392,100 @@ $("#rotateButton").click(function () {
 	//Test Button
 	console.log('rotateButton Pressed');
 	var pivot = new THREE.Object3D(),
-	activeGroup = [];
-	var centerPos = (cubeSize - 1) * 5.5; 
+		activeGroup = [];
+	var centerPos = (cubeSize - 1) * 5.5;
 	pivot.position.set(centerPos, centerPos, centerPos)
-	pivot.rotation.set(0,0,0);
+	pivot.rotation.set(0, 0, 0);
 
-	var total = 0;
-	console.log(objects);
-	objects.forEach(function(cubelet){
-		console.log(cubelet);
-		total = total + 1;
-	})
-	console.log(total);
-	var picked = 0;
-	objects.forEach(function(cubelet){
-		if(cubelet.position.y == 2){
+	objects.forEach(function (cubelet) {
+		if ((cubelet.position.y % 10) == 4) {
 			activeGroup.push(cubelet);
 			console.log(cubelet.position);
-			picked = picked + 1;
 		}
 	})
-	console.log(picked);
-
-	for(var i in activeGroup){
+	for (var i in activeGroup) {
 		pivot.attach(activeGroup[i])
 	}
-	console.log(pivot)
 
 	pivot.rotation.y = Math.PI / 2;
 
 
 	pivot.updateMatrixWorld();
 
-	for ( var i in activeGroup ) {
-    	scene.attach( activeGroup[ i ] );
-	}
-	// console.log(pivot)
-	// pivot.rotation.x
-	// animateGroup(t, pivot)
-	
+	for (var i in activeGroup) {
+		scene.attach(activeGroup[i]);
+		activeGroup[i].position.copy(activeGroup[i].position.round())
+		console.log(activeGroup[i].position)
 
+	}
+	console.log("pivot" + pivot)
 })
 
+$("#rotateButton2").click(function () {
+	//Test Button
+	console.log('rotateButton Pressed');
+	var pivot = new THREE.Object3D(),
+		activeGroup = [];
+	var centerPos = (cubeSize - 1) * 5.5;
+	pivot.position.set(centerPos, centerPos, centerPos)
+	pivot.rotation.set(0, 0, 0);
+
+	objects.forEach(function (cubelet) {
+		if ((cubelet.position.x % 10) == 2) {
+			activeGroup.push(cubelet);
+			console.log(cubelet.position);
+		}
+	})
+
+	for (var i in activeGroup) {
+		pivot.attach(activeGroup[i])
+	}
+
+	pivot.rotation.x = Math.PI / 2;
+
+
+	pivot.updateMatrixWorld();
+
+	for (var i in activeGroup) {
+		scene.attach(activeGroup[i]);
+		activeGroup[i].position.copy(activeGroup[i].position.round())
+		console.log(activeGroup[i].position)
+
+	}
+})
+$("#rotateButton3").click(function () {
+	//Test Button
+	console.log('rotateButton Pressed');
+	var pivot = new THREE.Object3D(),
+		activeGroup = [];
+	var centerPos = (cubeSize - 1) * 5.5;
+	pivot.position.set(centerPos, centerPos, centerPos)
+	pivot.rotation.set(0, 0, 0);
+
+	objects.forEach(function (cubelet) {
+		if ((cubelet.position.z % 10) == 1) {
+			activeGroup.push(cubelet);
+			console.log(cubelet);
+		}
+	})
+
+	for (var i in activeGroup) {
+		pivot.attach(activeGroup[i])
+	}
+
+	pivot.rotation.z = Math.PI / 2;
+
+
+	pivot.updateMatrixWorld();
+
+	for (var i in activeGroup) {
+		scene.attach(activeGroup[i]);
+		activeGroup[i].position.copy(activeGroup[i].position.round())
+		console.log(activeGroup[i])
+
+
+	}
+})
 // let fps = 60;
 // let tau = 2;
 // const step = 1/ (tau * fps);
@@ -451,7 +504,7 @@ $("#rotateButton").click(function () {
 
 var selectedColor = 0xf0e442;
 var cubeSize = 5;
-var moveTextArea= $('#textarea');
+var moveTextArea = $('#textarea');
 
 createCube(cubeSize);
 generateCubeState(cubeSize);

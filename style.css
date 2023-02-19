@@ -1,4 +1,4 @@
-.movesTextBox{
+.movesTextBox {
     height: 75%;
     width: 160px;
     position: fixed;
@@ -22,7 +22,7 @@
     transition: left .3s ease-out;
 }
 
-.colorSelector.active{
+.colorSelector.active {
     left: 90%;
     z-index: 2;
 }
@@ -36,11 +36,11 @@
     border-radius: 50%;
     cursor: pointer;
     z-index: 1;
-  }
+}
 
-.cubeSizeDropDown {
+/* .cubeSizeDropDown {
     height: 75%;
-    /* width: 200px; */
+    width: 200px;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -48,7 +48,7 @@
     overflow-x: hidden;
     padding-top: 80px;
     padding-left: 80px;
-}
+} */
 
 .button {
     border: none;
@@ -65,22 +65,59 @@
 .U {
     background-color: #f0e442
 }
+
 .D {
     background-color: #ffffff
 }
+
 .L {
     background-color: #cc79a7
 }
+
 .R {
     background-color: #d55e00
 }
+
 .F {
     background-color: #56b4e9
 }
+
 .B {
     background-color: #009e73
 }
 
 #activeColor {
     border: 5px solid black;
+}
+
+.split {
+    height: 100%;
+    /* width: 50%; */
+    position: fixed;
+    z-index: 0;
+    top: 0;
+    overflow-x: hidden;
+    /* padding-top: 20px; */
+}
+
+.left {
+    left: 0;
+    width: 60%;
+    z-index: 0;
+
+    background-color: #111;
+}
+
+.right {
+    right: 0;
+    width: 40%;
+    background: rgba(240, 230, 220, 0.3);
+}
+
+textarea {
+    width: 100%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+    background: rgba(240, 230, 220, 1);
 }

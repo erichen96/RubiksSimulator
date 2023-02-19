@@ -365,6 +365,12 @@ export function generateMovesPlacement(inputString, cubeSize) {
     }
 
     console.log(moves.perm.perm)
+    var cubestateTextArea = $('#cubestateTextArea');
+    for(i in moves.perm.perm){
+        cubestateTextArea.val(cubestateTextArea.val() + '\n' + i + ":" + moves.perm.perm[i]);
+
+    }
+
 
     return moves.perm.perm;
 }
