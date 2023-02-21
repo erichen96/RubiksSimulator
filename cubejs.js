@@ -8,7 +8,6 @@ const cube = new Cube();
 Cube.initSolver()
 
 // Odd cube size
-// 
 // Even cube size
 // Center/Edge pieces assumed to be correct pieces, may provide unsolvable state
 export function userInputToCube(string){
