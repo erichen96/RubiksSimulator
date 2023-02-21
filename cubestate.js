@@ -50,6 +50,38 @@ class Permutation {
 
         return new Permutation(new_perm);
     }
+
+    cycle_decomposition(){
+        console.log("cycle decomposition");
+        console.log(this.perm)
+        var els = Object.keys(this.perm);
+        var cycles = [];
+        while(els.length > 0){
+            let start = els.pop();
+            let next_el = this.perm[start];
+            let cycle = [start];
+            while(next_el != start){
+                let remove_el = els.indexOf(next_el);
+                els.splice(remove_el,1);
+                cycle.push(next_el);
+                next_el = this.perm[next_el];
+            }
+            cycles.push(cycle);
+        }
+        return cycles;
+    }
+
+    parity(){
+        let decomp = this.cycle_decomposition();
+        let parities = 0;
+        decomp.forEach(element => {
+            parities += (element.length - 1);
+        }
+        )
+        console.log(parities)
+        return parities % 2;
+    }
+
 }
 
 class CubeState {
@@ -364,15 +396,16 @@ export function generateMovesPlacement(inputString, cubeSize) {
         moves.apply_state(global_moves[stringArray[i]])
     }
 
-    console.log(moves.perm.perm)
-    var cubestateTextArea = $('#cubestateTextArea');
-    for(i in moves.perm.perm){
-        cubestateTextArea.val(cubestateTextArea.val() + '\n' + i + ":" + moves.perm.perm[i]);
+    console.log(moves)
+    // var cubestateTextArea = $('#cubestateTextArea');
+    // for(i in moves.perm.perm){
+    //     cubestateTextArea.val(cubestateTextArea.val() + '\n' + i + ":" + moves.perm.perm[i]);
 
-    }
+    // }
 
 
-    return moves.perm.perm;
+    // return moves.perm.perm;
+    return moves;
 }
 
 export function applyState(string, cubeSize){
@@ -426,3 +459,7 @@ function mirrorKeyToValue(obj){
     return mirror;
 }
 
+generateCubeState(3);
+let move = generateMovesPlacement("F2",3);
+console.log(move.perm.cycle_decomposition());
+console.log(move.perm.parity());

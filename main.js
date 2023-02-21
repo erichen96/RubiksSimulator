@@ -387,7 +387,104 @@ handle.onclick = function () {
 	colorSelector.classList.toggle('active');
 }
 
+function rotate(face, order){
+	console.log("Rotation");
+	var pivot = new THREE.Object3D(),
+	activeGroup = [];
+	var centerPos = (cubeSize - 1) * 5.5;
+	pivot.position.set(centerPos, centerPos, centerPos);
+	pivot.rotation.set(0,0,0);
 
+	switch(face){
+		case 'U':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.y % 10) == ((cubeSize - 1) - order)){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.y = -Math.PI/2;
+			break;
+		case 'D':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.y % 10) == order){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+			
+			pivot.rotation.y = Math.PI/2;
+			break;
+		case 'F':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.z % 10) == ((cubeSize - 1) - order)){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+			
+			pivot.rotation.z = -Math.PI/2;
+			break;
+		case 'B':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.z % 10) == order){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+			
+			pivot.rotation.z = Math.PI/2;
+			break;
+		case 'R':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.x % 10) == ((cubeSize - 1) - order)){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+			
+			pivot.rotation.x = -Math.PI/2;
+			break;
+		case 'L':
+			objects.forEach(function(cubelet){
+				if((cubelet.position.x % 10) == order){
+					activeGroup.push(cubelet);
+				}
+			})
+		
+			for (var i in activeGroup){
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.x = Math.PI/2;
+			break;
+	}
+
+	pivot.updateMatrixWorld();
+	for(var i in activeGroup){
+		scene.attach(activeGroup[i]);
+		activeGroup[i].position.copy(activeGroup[i].position.round());
+	}
+}
+$("#rotateButton4").click(function () {
+	rotate('L',0); //Assume order always positive
+})
 $("#rotateButton").click(function () {
 	//Test Button
 	console.log('rotateButton Pressed');
@@ -398,9 +495,9 @@ $("#rotateButton").click(function () {
 	pivot.rotation.set(0, 0, 0);
 
 	objects.forEach(function (cubelet) {
-		if ((cubelet.position.y % 10) == 4) {
+		let y = cubelet.position.y;
+		if ((y % 10) == 0) {
 			activeGroup.push(cubelet);
-			console.log(cubelet.position);
 		}
 	})
 	for (var i in activeGroup) {
@@ -415,10 +512,8 @@ $("#rotateButton").click(function () {
 	for (var i in activeGroup) {
 		scene.attach(activeGroup[i]);
 		activeGroup[i].position.copy(activeGroup[i].position.round())
-		console.log(activeGroup[i].position)
 
 	}
-	console.log("pivot" + pivot)
 })
 
 $("#rotateButton2").click(function () {
@@ -431,9 +526,8 @@ $("#rotateButton2").click(function () {
 	pivot.rotation.set(0, 0, 0);
 
 	objects.forEach(function (cubelet) {
-		if ((cubelet.position.x % 10) == 2) {
+		if ((cubelet.position.x % 10) == 0) {
 			activeGroup.push(cubelet);
-			console.log(cubelet.position);
 		}
 	})
 
@@ -449,7 +543,6 @@ $("#rotateButton2").click(function () {
 	for (var i in activeGroup) {
 		scene.attach(activeGroup[i]);
 		activeGroup[i].position.copy(activeGroup[i].position.round())
-		console.log(activeGroup[i].position)
 
 	}
 })
@@ -463,9 +556,8 @@ $("#rotateButton3").click(function () {
 	pivot.rotation.set(0, 0, 0);
 
 	objects.forEach(function (cubelet) {
-		if ((cubelet.position.z % 10) == 1) {
+		if ((cubelet.position.z % 10) == 4) {
 			activeGroup.push(cubelet);
-			console.log(cubelet);
 		}
 	})
 
@@ -473,7 +565,7 @@ $("#rotateButton3").click(function () {
 		pivot.attach(activeGroup[i])
 	}
 
-	pivot.rotation.z = Math.PI / 2;
+	pivot.rotation.z = -Math.PI / 2;
 
 
 	pivot.updateMatrixWorld();
@@ -481,9 +573,6 @@ $("#rotateButton3").click(function () {
 	for (var i in activeGroup) {
 		scene.attach(activeGroup[i]);
 		activeGroup[i].position.copy(activeGroup[i].position.round())
-		console.log(activeGroup[i])
-
-
 	}
 })
 // let fps = 60;
