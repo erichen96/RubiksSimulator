@@ -1,18 +1,4 @@
-
-// console.log(cubeSize)
-// Check if unique values are identical
-// const eqSet = (xs, ys) =>
-//     xs.size === ys.size &&
-//     [...xs].every((x) => ys.has(x));
-
-
-// function range(a,b){
-//     let arr = [];
-//     for(a; a<= b; a++){
-//         arr.push(a)
-//     }
-//     return arr;
-// }
+// ------------------------------- Util Functions -------------------------------
 
 function range(start, end) {
     return Array(end - start + 1).fill().map((_, idx) => start + idx)
@@ -27,6 +13,42 @@ function zip() {
     return longest.map(function (_, i) {
         return args.map(function (array) { return array[i] })
     });
+}
+
+function mirrorKeyToValue(obj) {
+    var mirror = {};
+    for (var key in obj) {
+        mirror[obj[key]] = key;
+    }
+    return mirror;
+}
+
+function cycle_decomposition(decomp) {
+    var els = Object.keys(decomp);
+    var cycles = [];
+    while (els.length > 0) {
+        let start = els.pop();
+        let next_el = decomp[start];
+        let cycle = [start];
+        while (next_el != start) {
+            let remove_el = els.indexOf(next_el);
+            els.splice(remove_el, 1);
+            cycle.push(next_el);
+            next_el = decomp[next_el];
+        }
+        cycles.push(cycle);
+    }
+
+    return cycles;
+}
+
+function parity(move) {
+    let decomp = cycle_decomposition(move);
+    let parities = 0;
+    decomp.forEach(element => {
+        parities += (element.length - 1);
+    })
+    return parities % 2;
 }
 
 class Permutation {
@@ -51,18 +73,18 @@ class Permutation {
         return new Permutation(new_perm);
     }
 
-    cycle_decomposition(){
+    cycle_decomposition() {
         console.log("cycle decomposition");
-        console.log(this.perm)
+        // console.log(this.perm)
         var els = Object.keys(this.perm);
         var cycles = [];
-        while(els.length > 0){
+        while (els.length > 0) {
             let start = els.pop();
             let next_el = this.perm[start];
             let cycle = [start];
-            while(next_el != start){
+            while (next_el != start) {
                 let remove_el = els.indexOf(next_el);
-                els.splice(remove_el,1);
+                els.splice(remove_el, 1);
                 cycle.push(next_el);
                 next_el = this.perm[next_el];
             }
@@ -71,7 +93,7 @@ class Permutation {
         return cycles;
     }
 
-    parity(){
+    parity() {
         let decomp = this.cycle_decomposition();
         let parities = 0;
         decomp.forEach(element => {
@@ -115,6 +137,7 @@ class CubeState {
 var global_moves = {}
 var moves; //Contains the cubestate of current moves
 
+// Generate the all move sets for a cubeSize
 export function generateCubeState(cubeSize) {
     var faceUr = faceRow("U", cubeSize)
     var faceUc = faceColumn("U", cubeSize)
@@ -388,6 +411,7 @@ export function generateCubeState(cubeSize) {
     }
 }
 
+// Apply given set of moves onto the cube
 export function generateMovesPlacement(inputString, cubeSize) {
     const stringArray = inputString.split(" ");
     moves = new CubeState(cubeSize);
@@ -397,69 +421,186 @@ export function generateMovesPlacement(inputString, cubeSize) {
     }
 
     console.log(moves)
-    // var cubestateTextArea = $('#cubestateTextArea');
-    // for(i in moves.perm.perm){
-    //     cubestateTextArea.val(cubestateTextArea.val() + '\n' + i + ":" + moves.perm.perm[i]);
 
-    // }
-
-
+    displayCubeState(moves.perm.perm)
     // return moves.perm.perm;
     return moves;
 }
 
-export function applyState(string, cubeSize){
+export function applyState(string, cubeSize) {
     const stringArray = string.split(" ");
     console.log(stringArray)
-    console.log(moves.perm.perm)
     for (var i = 0; i < stringArray.length; i++) {
         moves.apply_state(global_moves[stringArray[i]])
     }
     console.log('-----')
     console.log(moves.perm.perm);
 
-    return moves.perm.perm;
+    return moves;
 }
 
 export function generateKociembaStateToString(inputString, cubeSize) {
-    //Parse InputString to remove all moves that are for inner slices, remaining slices/ turns will be a set of moves used by cube.js
-    // To generate a cube.js cube object which can then be solved.
-    // 
-    //General State
-    // m = n/2
-    // 
-    // 0, m , 2m
-    // mn, mn + m, mn+2m
-    // 2mn, 2mn+m , 2mn+2m
     let moves = generateMovesPlacement(inputString, cubeSize)
     let turns = ["U", "R", "F", "D", "L", "B"];
     let KociembaString = '';
     let m = Math.floor(cubeSize / 2);
 
-    moves = mirrorKeyToValue(moves);
-    console.log(moves)
-    for (let f in turns){
-        KociembaString += 
-        moves[turns[f] + 0] + moves[turns[f] + m] + moves[turns[f] + (2*m)] + 
-        moves[turns[f] + (m * cubeSize)] + moves[turns[f] + ((m * cubeSize) + m)] + moves[turns[f] + (m * cubeSize + (2 * m))] +
-        moves[turns[f] + (cubeSize * m * 2)] + moves[turns[f] + ((cubeSize * m * 2) + m) ] + moves[turns[f] + ((2 * (m * cubeSize)) + (2 * m))]
+    let mirror = mirrorKeyToValue(moves.perm.perm);
+    console.log(mirror);
+    if (cubeSize % 2 == 1) {
+        for (let f in turns) {
+            KociembaString +=
+                mirror[turns[f] + 0] + mirror[turns[f] + m] + mirror[turns[f] + (2 * m)] +
+                mirror[turns[f] + (m * cubeSize)] + mirror[turns[f] + ((m * cubeSize) + m)] + mirror[turns[f] + (m * cubeSize + (2 * m))] +
+                mirror[turns[f] + (cubeSize * m * 2)] + mirror[turns[f] + ((cubeSize * m * 2) + m)] + mirror[turns[f] + ((2 * (m * cubeSize)) + (2 * m))]
+        }
+        KociembaString = KociembaString.replace(/[0-9]/g, '')
+        ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Solved Corner/ Edges, Kociemba]");
+    } else {
+        for (let f in turns) {
+            KociembaString +=
+                mirror[turns[f] + 0] + turns[f] + mirror[turns[f] + (cubeSize - 1)] +
+                turns[f] + turns[f] + turns[f] +
+                mirror[turns[f] + (cubeSize * (cubeSize - 1))] + turns[f] + mirror[turns[f] + ((cubeSize * cubeSize) - 1)];
+        }
+        KociembaString = KociembaString.replace(/[0-9]/g, '')
+
+        // If parity of even cube == 0, swap F1 and R1 to make odd parity
+        if (parity(getCornerPieces(moves, cubeSize)) == 0) {
+            KociembaString = KociembaString.substring(0, 10) + "F" + KociembaString.substring(11, 19) + "R" + KociembaString.substring(20);
+            ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Swapped F1 and R1 in 3x3 for Kociemba][Solve Corner/ Edges with Kociemba]");
+
+        } else {
+            ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Generated 3x3 from corner stickers for Kociemba][Solve Corner/ Edges with Kociemba]");
+
+        }
+        
     }
-
-    KociembaString = KociembaString.replace(/[0-9]/g,'')
-    console.log(KociembaString)
-
     return KociembaString;
 }
 
-function mirrorKeyToValue(obj){
-    var mirror = {};
-    for(var key in obj){
-        mirror[obj[key]] = key;
+export function adjustInnerSlices(cubeSize, slice){
+    //TODO:
+    //ADJUST to correct values
+    console.log(parity(getInnerSlicePiece(cubeSize, slice, moves)));
+    if(parity(getInnerSlicePiece(cubeSize, slice, moves)) == 1){
+        return "F";
+        // if parity of inner slice is 1, then return a move to 'fix' the slice permutation
+        //Ask question
+        // 1- Which turns would be made for each inner slice turn?
+        //
     }
-    return mirror;
+
+    return ["F", parity(getInnerSlicePiece(cubeSize, slice, moves))];
 }
 
-generateCubeState(3);
-let move = generateMovesPlacement("F2",3);
-console.log(move.perm.cycle_decomposition());
-console.log(move.perm.parity());
+// Corner & Center Edges Functions
+function getCornerPieces(moves, cubeSize) {
+    let corner = moves.perm.perm;
+    let cornerStickers = [];
+    let turns = ["U", "R", "F", "D", "L", "B"];
+    // 0, n - 1, n(n-1), (n*n) - 1
+    for (let f in turns) {
+        cornerStickers[turns[f] + 0] = corner[turns[f] + 0];
+        cornerStickers[turns[f] + (cubeSize - 1)] = corner[turns[f] + (cubeSize - 1)];
+        cornerStickers[turns[f] + (cubeSize * (cubeSize - 1))] = corner[turns[f] + (cubeSize * (cubeSize - 1))];
+        cornerStickers[turns[f] + ((cubeSize * cubeSize) - 1)] = corner[turns[f] + ((cubeSize * cubeSize) - 1)];
+    }
+
+    return cornerStickers;
+}
+
+function sticker2piece(move, cubeSize){
+    let s2p = [];
+    s2p["U" + 0] = "UBL";
+    s2p["L" + 0] = "UBL";
+    s2p["B" + (cubeSize - 1)] = "UBL";
+
+    s2p["U" + (cubeSize - 1)] = "URB";
+    s2p["R" + (cubeSize - 1)] = "URB";
+    s2p["B" + 0] = "URB";
+
+    s2p["U" + ((cubeSize - 1) * cubeSize)] = "ULF";
+    s2p["L" + (cubeSize - 1)] = "ULF";
+    s2p["F" + 0] = "ULF";
+
+    s2p["U" + ((cubeSize * cubeSize) - 1)] = "UFR";
+    s2p["F" + (cubeSize - 1)] = "UFR";
+    s2p["R" + 0] = "UFR";
+
+    s2p["D" + 0] = "DFL";
+    s2p["L" + ((cubeSize * cubeSize) - 1)] = "DFL";
+    s2p["F" + ((cubeSize - 1 ) * cubeSize)] = "DFL";
+
+    s2p["D" + (cubeSize - 1)] = "DRF";
+    s2p["F" + ((cubeSize * cubeSize) - 1)] = "DRF";
+    s2p["R" + ((cubeSize - 1) * cubeSize)] = "DRF";
+
+    s2p["D" + ((cubeSize - 1) * cubeSize)] = "DLB";
+    s2p["B" + ((cubeSize * cubeSize) - 1)] = "DLB";
+    s2p["L" + ((cubeSize - 1) * cubeSize)] = "DLB";
+
+    s2p["D" + ((cubeSize * cubeSize) - 1)] = "DBR";
+    s2p["R" + ((cubeSize * cubeSize) - 1)] = "DBR";
+    s2p["B" + ((cubeSize - 1) * cubeSize)] = "DBR";
+
+    let moved = [];
+
+    for(let i in s2p){
+        moved[i] = s2p[move.perm.perm[i]];
+    }
+
+    let viewUandD = [];
+    viewUandD["UBL"] = "U" + 0;
+    viewUandD["URB"] = "U" + (cubeSize - 1);
+    viewUandD["ULF"] = "U" + ((cubeSize - 1) * cubeSize);
+    viewUandD["UFR"] = "U" + ((cubeSize * cubeSize) - 1);
+    viewUandD["DFL"] = "D" + 0;
+    viewUandD["DRF"] = "D" + (cubeSize - 1);
+    viewUandD["DLB"] = "D" + ((cubeSize - 1) * cubeSize);
+    viewUandD["DBR"] = "D" + ((cubeSize * cubeSize) - 1);
+
+    let result = [];
+    for(let i in viewUandD){
+        result[i] = moved[viewUandD[i]];
+    }
+    console.log(result);
+    console.log(cycle_decomposition(result));
+    console.log(parity(result));
+
+    return parity(result);
+}
+
+// Inner Slice Functions
+function getInnerSlicePiece(cubeSize, slice, moves) {
+    let sliceStickers = [];
+    let turns = ["U", "R", "F", "D", "L", "B"];
+
+    let movesPerm = moves.perm.perm;
+    for (let f in turns) {
+        // sliceStickers[turns[f] + slice] = moves[turns[f] + slice];
+        sliceStickers[turns[f] + ((cubeSize - 1 - slice))] = movesPerm[turns[f] + ((cubeSize - 1 - slice))];
+        sliceStickers[turns[f] + (cubeSize * slice)] = movesPerm[turns[f] + (cubeSize * slice)];
+        // sliceStickers[turns[f] + ((cubeSize - 1) + (cubeSize * slice))] = movesPerm[turns[f] + ((cubeSize - 1) + (cubeSize * slice))];
+
+        // sliceStickers[turns[f] + (cubeSize * (cubeSize - (slice + 1)))] = movesPerm[turns[f] + (cubeSize * (cubeSize - (slice + 1)))];
+        sliceStickers[turns[f] + ((cubeSize * cubeSize - 1) - (cubeSize * slice))] = movesPerm[turns[f] + ((cubeSize * cubeSize - 1) - (cubeSize * slice))];
+        sliceStickers[turns[f] + ((cubeSize * (cubeSize - 1) + slice))] = movesPerm[turns[f] + ((cubeSize * (cubeSize - 1) + slice))];
+        // sliceStickers[turns[f] + ((cubeSize * cubeSize) - (1 + slice))] = movesPerm[turns[f] + ((cubeSize * cubeSize) - (1 + slice))];
+
+    }
+    console.log(sliceStickers);
+    return sliceStickers;
+
+}
+
+// Functions for Visuals
+function displayCubeState(cubeState) {
+    document.getElementById("offcanvas-cubeState-String").innerHTML = "";
+    for (let i in cubeState) {
+        document.getElementById("offcanvas-cubeState-String").innerHTML += "<li> " + i + " <span>&#8594;</span> " + cubeState[i]+ " </li>";
+    }
+}
+
+var ExplanationTextArea = $('#Explanations');
+

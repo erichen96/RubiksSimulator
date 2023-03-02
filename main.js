@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState } from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices} from './cubestate';
 import { userInputToCube } from './cubejs';
 
 const scene = new THREE.Scene();
@@ -14,6 +14,7 @@ let stickerObjects = []; //object to store all stickers only
 
 var container = document.getElementById('cubeDisplay');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
 var w = container.offsetWidth;
 var h = container.offsetHeight;
 renderer.setSize(w, h);
@@ -24,18 +25,46 @@ document.getElementById("cubeDisplay").appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
-
 document.addEventListener('pointerdown', onPointerDown);
 window.addEventListener('resize', onWindowResize);
 
 
-
+// ------------------------------- Threejs and Util Functions -------------------------------
 var degree = function degree(rad) {
 	return rad * Math.PI / 180;
 };
 
+function animate() {
+	requestAnimationFrame(animate);
+	renderer.render(scene, camera);
+	// controls.update();
+}
 
+function render() {
+	renderer.render(scene, camera);
+}
 
+function onWindowResize() {
+	camera.aspect = w / h;
+	camera.updateProjectionMatrix();
+	renderer.setSize(w, h);
+}
+
+//Center rotation on cube center, add axes for visual, range of camera from center
+function updateControls(cubeSize) {
+	var centerPos = (cubeSize - 1.55) * 5.15;
+	controls.target = new THREE.Vector3(centerPos, centerPos, centerPos);
+	controls.minDistance = cubeSize * 25;
+	controls.maxDistance = cubeSize * 25;
+	const axes = new THREE.AxesHelper(100);
+	var centerPos = (cubeSize - 1) * 5.5;
+	axes.position.set(centerPos, centerPos, centerPos);
+	scene.add(axes)
+	controls.update();
+
+}
+
+// ------------------------------- Cube Functions -------------------------------
 var Cube = function Cube(order) {
 	var _this = this;
 	this.createPieces = function () {
@@ -188,11 +217,40 @@ var Cube = function Cube(order) {
 	this.createPieces();
 }
 
+// Generate New Cube Visualization
+function createCube(cubeSize) {
+	//Set objects to [] to clear references to previous cube meshes
+	objects = [];
+	stickerObjects = [];
+	//Remove current cube
+	renderer.dispose()
+	scene.traverse(object => {
+		if (!object.isMesh) return
+		object.geometry.dispose()
+
+		if (object.material.isMaterial) {
+			object.material.dispose()
+		} else {
+			// an array of materials
+			for (const material of object.material) {
+				material.dispose()
+			}
+		}
+	})
+	scene.remove.apply(scene, scene.children);
+
+	var cube = new Cube(cubeSize);
+	updateControls(cubeSize);
+	animate();
+	// console.log(renderer.info)
+
+}
+
+// ------------------------------- Sticker Functions -------------------------------
 function onTextInputApplySticker(string, cubeSize) {
-	console.log("Text Applied")
 	let moves = generateMovesPlacement(string, cubeSize);
 	// console.log(moves["U1"])
-
+	moves = moves.perm.perm;
 	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
 		let addColor = scene.getObjectByName(moves[i]);
@@ -223,6 +281,8 @@ function onTextInputApplySticker(string, cubeSize) {
 
 function onTextSolveSticker(string, cubeSize) {
 	let moves = applyState(string, cubeSize);
+	moves = moves.perm.perm;
+	console.log(moves);
 	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
 		let addColor = scene.getObjectByName(moves[i]);
@@ -249,66 +309,7 @@ function onTextSolveSticker(string, cubeSize) {
 	}
 }
 
-
-function createCube(cubeSize) {
-	//Set objects to [] to clear references to previous cube meshes
-	objects = [];
-	stickerObjects = [];
-	//Remove current cube
-	renderer.dispose()
-	scene.traverse(object => {
-		if (!object.isMesh) return
-		object.geometry.dispose()
-
-		if (object.material.isMaterial) {
-			object.material.dispose()
-		} else {
-			// an array of materials
-			for (const material of object.material) {
-				material.dispose()
-			}
-		}
-	})
-	scene.remove.apply(scene, scene.children);
-
-	var cube = new Cube(cubeSize);
-	updateControls(cubeSize);
-	animate();
-	// console.log(renderer.info)
-
-}
-//Center rotation on cube center, add axes for visual, range of camera from center
-function updateControls(cubeSize) {
-	var centerPos = (cubeSize - 1.55) * 5.15;
-	controls.target = new THREE.Vector3(centerPos, centerPos, centerPos);
-	controls.minDistance = cubeSize * 20;
-	controls.maxDistance = cubeSize * 25;
-	const axes = new THREE.AxesHelper(100);
-	var centerPos = (cubeSize - 1) * 5.5;
-	axes.position.set(centerPos, centerPos, centerPos);
-	scene.add(axes)
-	controls.update();
-
-}
-
-
-function animate() {
-	requestAnimationFrame(animate);
-	renderer.render(scene, camera);
-	// controls.update();
-}
-
-function render() {
-	renderer.render(scene, camera);
-}
-
-function onWindowResize() {
-	camera.aspect = w / h;
-	camera.updateProjectionMatrix();
-	renderer.setSize(w, h);
-}
-
-
+// on Click Change Sticker Color to active Color
 function onPointerDown(event) {
 
 	// Offset for div elements
@@ -334,7 +335,6 @@ function onPointerDown(event) {
 
 }
 
-
 // On ColorPicker click
 // Change to new color
 $(".button").click(function () {
@@ -344,146 +344,133 @@ $(".button").click(function () {
 
 })
 
-
+// ------------------------------- Setting Functions -------------------------------
 $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 	var menu = $(this).val();
+	document.getElementById("dropdown-menu-value").innerHTML = menu + "x" + menu + "x" + menu;
 	createCube(menu);
 	generateCubeState(menu);
 	cubeSize = menu;
 });
 
 
-$("#applySticker").submit(function (e) {
-	console.log("applyStickering");
-	e.preventDefault(); // Prevents loading page
-	var text = document.getElementById("textboxID").value;
-	console.log(text);
-	onTextInputApplySticker(text, cubeSize);
-	// console.log(userInputToCube(text))
-	// onTextInputApplySticker(userInputToCube(text), cubeSize);
+// ------------------------------- Solution Functions -------------------------------
 
-	//Append to text box
-	moveTextArea.val(moveTextArea.val() + '\n' + text);
-
-})
-
-$("#fixSticker").submit(function (e) {
-	console.log("Solution");
-	e.preventDefault();
-	var text = document.getElementById("textboxID").value;
+$("#solveCornerPieceButton").click(function () {
+	var text = document.getElementById("InitialState").value;
 	var KociembaSolution = userInputToCube(generateKociembaStateToString(text, cubeSize))
 	console.log(KociembaSolution)
 	onTextSolveSticker(KociembaSolution, cubeSize);
-
-	moveTextArea.val(moveTextArea.val() + '\n' + KociembaSolution);
-
-
+	solutionTextArea.val(KociembaSolution + " [Solve Corner/ Edges with Kociemba]");
 })
 
-// Handle for user to change colorSelector activeColor
-const colorSelector = document.querySelector('.colorSelector')
-const handle = colorSelector.querySelector('.handle')
-handle.onclick = function () {
-	colorSelector.classList.toggle('active');
-}
+$("#adjustInnerSliceButton").click(function () {
+	let innerslices = Math.floor(cubeSize / 2) - 1;
+	for(let i = 0; i < innerslices; i++){
+		let fix = adjustInnerSlices(cubeSize, i);
 
-function rotate(face, order){
+		onTextSolveSticker(fix[0], cubeSize);
+		solutionTextArea.val(solutionTextArea.val() + "\n" + "Parity of Inner Slice " + i + " was " + fix[1])
+	}
+})
+
+function rotate(face, order) {
 	console.log("Rotation");
 	var pivot = new THREE.Object3D(),
-	activeGroup = [];
+		activeGroup = [];
 	var centerPos = (cubeSize - 1) * 5.5;
 	pivot.position.set(centerPos, centerPos, centerPos);
-	pivot.rotation.set(0,0,0);
+	pivot.rotation.set(0, 0, 0);
 
-	switch(face){
+	switch (face) {
 		case 'U':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.y % 10) == ((cubeSize - 1) - order)){
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.y % 10) == ((cubeSize - 1) - order)) {
 					activeGroup.push(cubelet);
 				}
 			})
-		
-			for (var i in activeGroup){
+
+			for (var i in activeGroup) {
 				pivot.attach(activeGroup[i])
 			}
 
-			pivot.rotation.y = -Math.PI/2;
+			pivot.rotation.y = -Math.PI / 2;
 			break;
 		case 'D':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.y % 10) == order){
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.y % 10) == order) {
 					activeGroup.push(cubelet);
 				}
 			})
-		
-			for (var i in activeGroup){
-				pivot.attach(activeGroup[i])
-			}
-			
-			pivot.rotation.y = Math.PI/2;
-			break;
-		case 'F':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.z % 10) == ((cubeSize - 1) - order)){
-					activeGroup.push(cubelet);
-				}
-			})
-		
-			for (var i in activeGroup){
-				pivot.attach(activeGroup[i])
-			}
-			
-			pivot.rotation.z = -Math.PI/2;
-			break;
-		case 'B':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.z % 10) == order){
-					activeGroup.push(cubelet);
-				}
-			})
-		
-			for (var i in activeGroup){
-				pivot.attach(activeGroup[i])
-			}
-			
-			pivot.rotation.z = Math.PI/2;
-			break;
-		case 'R':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.x % 10) == ((cubeSize - 1) - order)){
-					activeGroup.push(cubelet);
-				}
-			})
-		
-			for (var i in activeGroup){
-				pivot.attach(activeGroup[i])
-			}
-			
-			pivot.rotation.x = -Math.PI/2;
-			break;
-		case 'L':
-			objects.forEach(function(cubelet){
-				if((cubelet.position.x % 10) == order){
-					activeGroup.push(cubelet);
-				}
-			})
-		
-			for (var i in activeGroup){
+
+			for (var i in activeGroup) {
 				pivot.attach(activeGroup[i])
 			}
 
-			pivot.rotation.x = Math.PI/2;
+			pivot.rotation.y = Math.PI / 2;
+			break;
+		case 'F':
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.z % 10) == ((cubeSize - 1) - order)) {
+					activeGroup.push(cubelet);
+				}
+			})
+
+			for (var i in activeGroup) {
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.z = -Math.PI / 2;
+			break;
+		case 'B':
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.z % 10) == order) {
+					activeGroup.push(cubelet);
+				}
+			})
+
+			for (var i in activeGroup) {
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.z = Math.PI / 2;
+			break;
+		case 'R':
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.x % 10) == ((cubeSize - 1) - order)) {
+					activeGroup.push(cubelet);
+				}
+			})
+
+			for (var i in activeGroup) {
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.x = -Math.PI / 2;
+			break;
+		case 'L':
+			objects.forEach(function (cubelet) {
+				if ((cubelet.position.x % 10) == order) {
+					activeGroup.push(cubelet);
+				}
+			})
+
+			for (var i in activeGroup) {
+				pivot.attach(activeGroup[i])
+			}
+
+			pivot.rotation.x = Math.PI / 2;
 			break;
 	}
 
 	pivot.updateMatrixWorld();
-	for(var i in activeGroup){
+	for (var i in activeGroup) {
 		scene.attach(activeGroup[i]);
 		activeGroup[i].position.copy(activeGroup[i].position.round());
 	}
 }
 $("#rotateButton4").click(function () {
-	rotate('L',0); //Assume order always positive
+	rotate('L', 0); //Assume order always positive
 })
 $("#rotateButton").click(function () {
 	//Test Button
@@ -593,7 +580,27 @@ $("#rotateButton3").click(function () {
 
 var selectedColor = 0xf0e442;
 var cubeSize = 5;
-var moveTextArea = $('#textarea');
+var solutionTextArea = $('#SolutionState');
 
 createCube(cubeSize);
 generateCubeState(cubeSize);
+
+
+// Initial State TextArea
+const initialState = document.getElementById('InitialState');
+initialState.addEventListener('input', updateInitialInputState);
+
+// OnChange Update Cube to new State by User Input
+function updateInitialInputState(e) {
+	console.log(e.target.value)
+	if (e.target.value == "") {
+		createCube(cubeSize);
+		generateCubeState(cubeSize);
+	} else {
+		try {
+			onTextInputApplySticker(e.target.value, cubeSize);
+		} catch (error) {
+			// console.log(error);
+		}
+	}
+}

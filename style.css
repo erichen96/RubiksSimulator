@@ -8,52 +8,10 @@
     border: 0;
 }
 
-.colorSelector {
-    /* height: 75%; */
-    width: 160px;
-    position: fixed;
-    z-index: 2;
-    top: 0;
-    right: 0;
-    /*overflow-x: hidden;*/
-    padding-top: 80px;
-
-    left: 100%;
-    transition: left .3s ease-out;
-}
-
-.colorSelector.active {
-    left: 90%;
-    z-index: 2;
-}
-
-.handle {
-    position: absolute;
-    top: 10px;
-    left: -55px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 1;
-}
-
-/* .cubeSizeDropDown {
-    height: 75%;
-    width: 200px;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    overflow-x: hidden;
-    padding-top: 80px;
-    padding-left: 80px;
-} */
-
 .button {
     border: none;
     color: black;
-    padding: 50px 50px;
+    padding: 25px 25px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -102,7 +60,7 @@
 
 .left {
     left: 0;
-    width: 60%;
+    width: 50%;
     z-index: 0;
 
     background-color: #111;
@@ -110,7 +68,7 @@
 
 .right {
     right: 0;
-    width: 40%;
+    width: 50%;
     background: rgba(240, 230, 220, 0.3);
 }
 
@@ -120,4 +78,8 @@ textarea {
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;         /* Opera/IE 8+ */
     background: rgba(240, 230, 220, 1);
+}
+
+h1 {
+    text-align: center;
 }
