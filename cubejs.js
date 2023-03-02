@@ -9,6 +9,5 @@ Cube.initSolver()
 export function userInputToCube(string){
     var cube = Cube.fromString(string);
     let solution = cube.solve();
-    console.log(solution);
     return solution;
 }

@@ -78,6 +78,7 @@ textarea {
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;         /* Opera/IE 8+ */
     background: rgba(240, 230, 220, 1);
+    resize: none; 
 }
 
 h1 {

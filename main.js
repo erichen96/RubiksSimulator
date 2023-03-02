@@ -64,6 +64,49 @@ function updateControls(cubeSize) {
 
 }
 
+// ------------------------------- User Text Functions -------------------------------
+
+// Initial State TextArea
+var initialState = document.getElementById('InitialState');
+initialState.addEventListener('input', updateInitialInputState);
+var explanationTextArea = document.getElementById("Explanations")
+var solutionTextArea = document.getElementById("SolutionState");
+var heightLimit = 200; /* Maximum height: 200px */
+
+initialState.oninput = function() {
+	updateTextAreaSize();
+};
+
+// OnChange Update Cube to new State by User Input
+function updateInitialInputState(e) {
+	console.log(e.target.value)
+	if (e.target.value == "") {
+		createCube(cubeSize);
+		generateCubeState(cubeSize);
+		solutionTextArea.value = "";
+		explanationTextArea.value = "";
+		
+	} else {
+		try {
+			onTextInputApplySticker(e.target.value, cubeSize);
+		} catch (error) {
+			// console.log(error);
+		}
+	}
+}
+
+
+function updateTextAreaSize(){
+	solutionTextArea.style.height = ""; /* Reset the height*/
+	solutionTextArea.style.height = Math.min(solutionTextArea.scrollHeight, heightLimit) + "px";
+
+	initialState.style.height = ""; /* Reset the height*/
+	initialState.style.height = Math.min(initialState.scrollHeight, heightLimit) + "px";
+
+	explanationTextArea.style.height = ""; /* Reset the height*/
+	explanationTextArea.style.height = Math.min(explanationTextArea.scrollHeight, heightLimit) + "px";
+}
+
 // ------------------------------- Cube Functions -------------------------------
 var Cube = function Cube(order) {
 	var _this = this;
@@ -282,7 +325,7 @@ function onTextInputApplySticker(string, cubeSize) {
 function onTextSolveSticker(string, cubeSize) {
 	let moves = applyState(string, cubeSize);
 	moves = moves.perm.perm;
-	console.log(moves);
+	// console.log(moves);
 	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
 		let addColor = scene.getObjectByName(moves[i]);
@@ -351,6 +394,9 @@ $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 	createCube(menu);
 	generateCubeState(menu);
 	cubeSize = menu;
+	initialState.value = "";
+	solutionTextArea.value = "";
+	explanationTextArea.value = "";
 });
 
 
@@ -358,19 +404,24 @@ $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 
 $("#solveCornerPieceButton").click(function () {
 	var text = document.getElementById("InitialState").value;
-	var KociembaSolution = userInputToCube(generateKociembaStateToString(text, cubeSize))
-	console.log(KociembaSolution)
+	var Kociemba = generateKociembaStateToString(text, cubeSize);
+	var KociembaSolution = userInputToCube(Kociemba[0])
 	onTextSolveSticker(KociembaSolution, cubeSize);
-	solutionTextArea.val(KociembaSolution + " [Solve Corner/ Edges with Kociemba]");
+	solutionTextArea.value = (KociembaSolution + " [Solve Corner/ Edges with Kociemba]")
+	explanationTextArea.value = ("Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	updateTextAreaSize()
+
 })
 
 $("#adjustInnerSliceButton").click(function () {
-	let innerslices = Math.floor(cubeSize / 2) - 1;
-	for(let i = 0; i < innerslices; i++){
+	let innerslices = Math.floor(cubeSize / 2);
+	for(let i = 1; i < innerslices; i++){
 		let fix = adjustInnerSlices(cubeSize, i);
-
 		onTextSolveSticker(fix[0], cubeSize);
-		solutionTextArea.val(solutionTextArea.val() + "\n" + "Parity of Inner Slice " + i + " was " + fix[1])
+		solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " [Adjust Inner Slice " + i + " ]")
+		explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was " + fix[1];
+		updateTextAreaSize()
+
 	}
 })
 
@@ -580,27 +631,7 @@ $("#rotateButton3").click(function () {
 
 var selectedColor = 0xf0e442;
 var cubeSize = 5;
-var solutionTextArea = $('#SolutionState');
 
 createCube(cubeSize);
 generateCubeState(cubeSize);
 
-
-// Initial State TextArea
-const initialState = document.getElementById('InitialState');
-initialState.addEventListener('input', updateInitialInputState);
-
-// OnChange Update Cube to new State by User Input
-function updateInitialInputState(e) {
-	console.log(e.target.value)
-	if (e.target.value == "") {
-		createCube(cubeSize);
-		generateCubeState(cubeSize);
-	} else {
-		try {
-			onTextInputApplySticker(e.target.value, cubeSize);
-		} catch (error) {
-			// console.log(error);
-		}
-	}
-}

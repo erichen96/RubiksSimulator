@@ -419,22 +419,16 @@ export function generateMovesPlacement(inputString, cubeSize) {
     for (var i = 0; i < stringArray.length; i++) {
         moves.apply_state(global_moves[stringArray[i]])
     }
-
-    console.log(moves)
-
+    console.log(moves.perm.perm);
     displayCubeState(moves.perm.perm)
-    // return moves.perm.perm;
     return moves;
 }
 
 export function applyState(string, cubeSize) {
     const stringArray = string.split(" ");
-    console.log(stringArray)
     for (var i = 0; i < stringArray.length; i++) {
         moves.apply_state(global_moves[stringArray[i]])
     }
-    console.log('-----')
-    console.log(moves.perm.perm);
 
     return moves;
 }
@@ -446,7 +440,6 @@ export function generateKociembaStateToString(inputString, cubeSize) {
     let m = Math.floor(cubeSize / 2);
 
     let mirror = mirrorKeyToValue(moves.perm.perm);
-    console.log(mirror);
     if (cubeSize % 2 == 1) {
         for (let f in turns) {
             KociembaString +=
@@ -455,7 +448,7 @@ export function generateKociembaStateToString(inputString, cubeSize) {
                 mirror[turns[f] + (cubeSize * m * 2)] + mirror[turns[f] + ((cubeSize * m * 2) + m)] + mirror[turns[f] + ((2 * (m * cubeSize)) + (2 * m))]
         }
         KociembaString = KociembaString.replace(/[0-9]/g, '')
-        ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Solved Corner/ Edges, Kociemba]");
+        // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Solved Corner/ Edges, Kociemba]");
     } else {
         for (let f in turns) {
             KociembaString +=
@@ -468,15 +461,15 @@ export function generateKociembaStateToString(inputString, cubeSize) {
         // If parity of even cube == 0, swap F1 and R1 to make odd parity
         if (parity(getCornerPieces(moves, cubeSize)) == 0) {
             KociembaString = KociembaString.substring(0, 10) + "F" + KociembaString.substring(11, 19) + "R" + KociembaString.substring(20);
-            ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Swapped F1 and R1 in 3x3 for Kociemba][Solve Corner/ Edges with Kociemba]");
+            // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Swapped F1 and R1 in 3x3 for Kociemba][Solve Corner/ Edges with Kociemba]");
 
         } else {
-            ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Generated 3x3 from corner stickers for Kociemba][Solve Corner/ Edges with Kociemba]");
+            // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Generated 3x3 from corner stickers for Kociemba][Solve Corner/ Edges with Kociemba]");
 
         }
         
     }
-    return KociembaString;
+    return [KociembaString, sticker2piece(moves,cubeSize)];
 }
 
 export function adjustInnerSlices(cubeSize, slice){
@@ -564,9 +557,6 @@ function sticker2piece(move, cubeSize){
     for(let i in viewUandD){
         result[i] = moved[viewUandD[i]];
     }
-    console.log(result);
-    console.log(cycle_decomposition(result));
-    console.log(parity(result));
 
     return parity(result);
 }
@@ -595,6 +585,7 @@ function getInnerSlicePiece(cubeSize, slice, moves) {
 }
 
 // Functions for Visuals
+// (Move to main.js and export to here?)
 function displayCubeState(cubeState) {
     document.getElementById("offcanvas-cubeState-String").innerHTML = "";
     for (let i in cubeState) {
@@ -602,5 +593,5 @@ function displayCubeState(cubeState) {
     }
 }
 
-var ExplanationTextArea = $('#Explanations');
+
 
