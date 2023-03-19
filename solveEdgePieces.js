@@ -3,7 +3,8 @@ import { appendInformation } from './main.js';
 
 //Fetch Edge Comm Solutions
 let edge_comms = new Map();
-await fetch('resources/edge-comms.txt') // fetch text file
+const edgecomms_url = new URL('/resources/edge-comms.txt', import.meta.url).href
+await fetch(edgecomms_url) // fetch text file
     .then((response) => response.text())
     .then(textString => {
         const edgecomms = textString.split(/\r?\n/);

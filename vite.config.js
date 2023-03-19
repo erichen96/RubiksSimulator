@@ -1,5 +1,10 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    base:'/RubiksSimulator/'
+    base:'/RubiksSimulator/',
+    build: {
+        minify: 'esbuild',
+        target: "esnext"
+      }
+      
 })
