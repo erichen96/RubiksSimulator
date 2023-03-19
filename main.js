@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices} from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution } from './cubestate';
 import { userInputToCube } from './cubejs';
+import { solveEdgeStickers } from './solveEdgePieces';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
@@ -73,9 +74,15 @@ var explanationTextArea = document.getElementById("Explanations")
 var solutionTextArea = document.getElementById("SolutionState");
 var heightLimit = 200; /* Maximum height: 200px */
 
-initialState.oninput = function() {
+initialState.oninput = function () {
 	updateTextAreaSize();
 };
+
+//Append additional information from minor functions
+export function appendInformation(movesString, explanation) {
+	solutionTextArea.value = (solutionTextArea.value + '\n' + movesString)
+	explanationTextArea.value = (explanationTextArea.value) + '\n' + explanation + movesString;
+}
 
 // OnChange Update Cube to new State by User Input
 function updateInitialInputState(e) {
@@ -85,18 +92,22 @@ function updateInitialInputState(e) {
 		generateCubeState(cubeSize);
 		solutionTextArea.value = "";
 		explanationTextArea.value = "";
-		
+
 	} else {
 		try {
 			onTextInputApplySticker(e.target.value, cubeSize);
+			solutionTextArea.value = "";
+			explanationTextArea.value = "";
 		} catch (error) {
 			// console.log(error);
+			solutionTextArea.value = "";
+			explanationTextArea.value = "";
 		}
 	}
 }
 
-
-function updateTextAreaSize(){
+//Call this function when appending to any textarea to expand with input
+function updateTextAreaSize() {
 	solutionTextArea.style.height = ""; /* Reset the height*/
 	solutionTextArea.style.height = Math.min(solutionTextArea.scrollHeight, heightLimit) + "px";
 
@@ -292,7 +303,6 @@ function createCube(cubeSize) {
 // ------------------------------- Sticker Functions -------------------------------
 function onTextInputApplySticker(string, cubeSize) {
 	let moves = generateMovesPlacement(string, cubeSize);
-	// console.log(moves["U1"])
 	moves = moves.perm.perm;
 	for (var i in moves) {
 		let stickerLetter = i.replace(/[0-9]/g, '');
@@ -407,23 +417,42 @@ $("#solveCornerPieceButton").click(function () {
 	var Kociemba = generateKociembaStateToString(text, cubeSize);
 	var KociembaSolution = userInputToCube(Kociemba[0])
 	onTextSolveSticker(KociembaSolution, cubeSize);
-	solutionTextArea.value = (KociembaSolution + " [Solve Corner/ Edges with Kociemba]")
-	explanationTextArea.value = ("Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	solutionTextArea.value = (KociembaSolution)
+	explanationTextArea.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
 	updateTextAreaSize()
 
 })
 
 $("#adjustInnerSliceButton").click(function () {
 	let innerslices = Math.floor(cubeSize / 2);
-	for(let i = 1; i < innerslices; i++){
+	for (let i = 1; i < innerslices; i++) {
 		let fix = adjustInnerSlices(cubeSize, i);
-		onTextSolveSticker(fix[0], cubeSize);
-		solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " [Adjust Inner Slice " + i + " ]")
-		explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was " + fix[1];
+		if (fix[0] == 0) {
+			// solutionTextArea.value = (solutionTextArea.value + '\n')
+			explanationTextArea.value = (explanationTextArea.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
+		} else {
+			onTextSolveSticker(fix[0], cubeSize);
+			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
+			explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
+		}
 		updateTextAreaSize()
-
 	}
+
 })
+
+$("#solveSliceButton").click(function () {
+	let solution = generateEdgeSolution(cubeSize)
+	console.log(solution)
+	solution.forEach(element => {
+		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
+		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		onTextSolveSticker(element[1], cubeSize)
+	});
+
+	updateTextAreaSize()
+})
+
+
 
 function rotate(face, order) {
 	console.log("Rotation");

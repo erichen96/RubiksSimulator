@@ -1,3 +1,5 @@
+import { solveEdgeStickers } from './solveEdgePieces';
+
 // ------------------------------- Util Functions -------------------------------
 
 function range(start, end) {
@@ -23,7 +25,7 @@ function mirrorKeyToValue(obj) {
     return mirror;
 }
 
-function cycle_decomposition(decomp) {
+export function cycle_decomposition(decomp) {
     var els = Object.keys(decomp);
     var cycles = [];
     while (els.length > 0) {
@@ -42,7 +44,7 @@ function cycle_decomposition(decomp) {
     return cycles;
 }
 
-function parity(move) {
+export function parity(move) {
     let decomp = cycle_decomposition(move);
     let parities = 0;
     decomp.forEach(element => {
@@ -413,6 +415,8 @@ export function generateCubeState(cubeSize) {
 
 // Apply given set of moves onto the cube
 export function generateMovesPlacement(inputString, cubeSize) {
+    inputString = inputString.replace(/[\r\n]/g, " ");
+    console.log(inputString)
     const stringArray = inputString.split(" ");
     moves = new CubeState(cubeSize);
 
@@ -459,7 +463,7 @@ export function generateKociembaStateToString(inputString, cubeSize) {
         KociembaString = KociembaString.replace(/[0-9]/g, '')
 
         // If parity of even cube == 0, swap F1 and R1 to make odd parity
-        if (parity(getCornerPieces(moves, cubeSize)) == 0) {
+        if (parity(getCornerPieces(moves, cubeSize)) == 1) {
             KociembaString = KociembaString.substring(0, 10) + "F" + KociembaString.substring(11, 19) + "R" + KociembaString.substring(20);
             // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Swapped F1 and R1 in 3x3 for Kociemba][Solve Corner/ Edges with Kociemba]");
 
@@ -467,24 +471,18 @@ export function generateKociembaStateToString(inputString, cubeSize) {
             // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Generated 3x3 from corner stickers for Kociemba][Solve Corner/ Edges with Kociemba]");
 
         }
-        
+
     }
-    return [KociembaString, sticker2piece(moves,cubeSize)];
+    return [KociembaString, sticker2piece(moves, cubeSize)];
 }
 
-export function adjustInnerSlices(cubeSize, slice){
-    //TODO:
-    //ADJUST to correct values
-    console.log(parity(getInnerSlicePiece(cubeSize, slice, moves)));
-    if(parity(getInnerSlicePiece(cubeSize, slice, moves)) == 1){
-        return "F";
-        // if parity of inner slice is 1, then return a move to 'fix' the slice permutation
-        //Ask question
-        // 1- Which turns would be made for each inner slice turn?
-        //
+export function adjustInnerSlices(cubeSize, slice) {
+    if (parity(getInnerSlicePiece(cubeSize, slice, moves)) == 1) {
+        console.log(slice + 1 + "R");
+        return [slice + 1 + "R", parity(getInnerSlicePiece(cubeSize, slice, moves))];
     }
 
-    return ["F", parity(getInnerSlicePiece(cubeSize, slice, moves))];
+    return [0, parity(getInnerSlicePiece(cubeSize, slice, moves))];
 }
 
 // Corner & Center Edges Functions
@@ -503,7 +501,7 @@ function getCornerPieces(moves, cubeSize) {
     return cornerStickers;
 }
 
-function sticker2piece(move, cubeSize){
+function sticker2piece(move, cubeSize) {
     let s2p = [];
     s2p["U" + 0] = "UBL";
     s2p["L" + 0] = "UBL";
@@ -523,7 +521,7 @@ function sticker2piece(move, cubeSize){
 
     s2p["D" + 0] = "DFL";
     s2p["L" + ((cubeSize * cubeSize) - 1)] = "DFL";
-    s2p["F" + ((cubeSize - 1 ) * cubeSize)] = "DFL";
+    s2p["F" + ((cubeSize - 1) * cubeSize)] = "DFL";
 
     s2p["D" + (cubeSize - 1)] = "DRF";
     s2p["F" + ((cubeSize * cubeSize) - 1)] = "DRF";
@@ -539,7 +537,7 @@ function sticker2piece(move, cubeSize){
 
     let moved = [];
 
-    for(let i in s2p){
+    for (let i in s2p) {
         moved[i] = s2p[move.perm.perm[i]];
     }
 
@@ -554,7 +552,7 @@ function sticker2piece(move, cubeSize){
     viewUandD["DBR"] = "D" + ((cubeSize * cubeSize) - 1);
 
     let result = [];
-    for(let i in viewUandD){
+    for (let i in viewUandD) {
         result[i] = moved[viewUandD[i]];
     }
 
@@ -562,7 +560,7 @@ function sticker2piece(move, cubeSize){
 }
 
 // Inner Slice Functions
-function getInnerSlicePiece(cubeSize, slice, moves) {
+export function getInnerSlicePiece(cubeSize, slice, moves) {
     let sliceStickers = [];
     let turns = ["U", "R", "F", "D", "L", "B"];
 
@@ -579,7 +577,6 @@ function getInnerSlicePiece(cubeSize, slice, moves) {
         // sliceStickers[turns[f] + ((cubeSize * cubeSize) - (1 + slice))] = movesPerm[turns[f] + ((cubeSize * cubeSize) - (1 + slice))];
 
     }
-    console.log(sliceStickers);
     return sliceStickers;
 
 }
@@ -587,11 +584,13 @@ function getInnerSlicePiece(cubeSize, slice, moves) {
 // Functions for Visuals
 // (Move to main.js and export to here?)
 function displayCubeState(cubeState) {
-    document.getElementById("offcanvas-cubeState-String").innerHTML = "";
+    // document.getElementById("offcanvas-cubeState-String").innerHTML = "";
     for (let i in cubeState) {
-        document.getElementById("offcanvas-cubeState-String").innerHTML += "<li> " + i + " <span>&#8594;</span> " + cubeState[i]+ " </li>";
+        // document.getElementById("offcanvas-cubeState-String").innerHTML += "<li> " + i + " <span>&#8594;</span> " + cubeState[i]+ " </li>";
     }
 }
 
-
-
+export function generateEdgeSolution(cubeSize) {
+    let solution = solveEdgeStickers(moves, cubeSize);
+    return solution;
+}

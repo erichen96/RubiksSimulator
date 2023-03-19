@@ -79,7 +79,14 @@ textarea {
     box-sizing: border-box;         /* Opera/IE 8+ */
     background: rgba(240, 230, 220, 1);
     resize: none; 
+    /* border-radius: 1em;
+    border: 1px solid #000; */
+    /* outline: none; */
+    border-radius: 4px;
+
+
 }
+​
 
 h1 {
     text-align: center;

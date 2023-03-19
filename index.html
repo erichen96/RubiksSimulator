@@ -31,7 +31,7 @@
       <div>
         <h2>Solution</h2>
       </div>
-      <textarea readonly id="SolutionState" placeholder="[Enter Moves] [TESTING]"></textarea>
+      <textarea readonly id="SolutionState" placeholder="[Solution to NxNxN Cube]"></textarea>
     </div>
 
     <!-- Explanations  will be printed here -->
@@ -49,6 +49,7 @@
       </div>
       <button id="solveCornerPieceButton" type="button" class="btn btn-primary">Solve Corner Pieces and Center Edges</button>
       <button id="adjustInnerSliceButton" type="button" class="btn btn-primary">Adjust Inner Slices</button>
+      <button id="solveSliceButton" type="button" class="btn btn-primary">Solve Slices</button>
 
     </div>
     <!-- Area for Cube Settings, ie. Size -->
@@ -135,6 +136,9 @@
 <script type="module" src="/main.js"></script>
 <script type="module" src="/cubestate.js"></script>
 <script type="module" src="/cubejs.js"></script>
+<script type="module" src="/solveEdgePieces.js"></script>
+
+
 <!-- <script src="canvasExample.js"></script> -->
 
 </html>
