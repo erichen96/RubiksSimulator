@@ -46,6 +46,8 @@ function render() {
 }
 
 function onWindowResize() {
+	w = container.offsetWidth;
+	h = container.offsetHeight;
 	camera.aspect = w / h;
 	camera.updateProjectionMatrix();
 	renderer.setSize(w, h);
