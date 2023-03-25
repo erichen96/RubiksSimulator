@@ -23,7 +23,7 @@ export function solveEdgeStickers(moves, cubeSize) {
 
     let solution = [];
 
-    for (let slice = 1; slice <= Math.floor(cubeSize / 2); slice++) {
+    for (let slice = 1; slice < Math.floor(cubeSize / 2); slice++) {
         //Solve for Da
         let a = cubeSize - 1 - slice;
         let b = cubeSize * slice;
@@ -57,12 +57,21 @@ export function solveEdgeStickers(moves, cubeSize) {
 
         //Solve remaining Edge Pieces
         let innerMoves = getInnerSlicePiece(cubeSize, slice, moves);
-        // console.log("Hashmap of Corners")
-        // console.log(innerMoves);
+        console.log("Hashmap of Corners")
+        console.log(innerMoves);
 
         let cycles = cycle_decomposition(innerMoves);
-        // console.log("Cycle Decomposition")
-        // console.log(cycles)
+        console.log("Cycle Decomposition")
+        console.log(cycles)
+        
+        //Compute a,b,c,d for current orientation
+        for(let cycle in cycles){
+            cycles[cycle].forEach((element, index) => {
+                cycles[cycle][index] = (element.replace(re, function (matched){
+                    return mapObj[matched];
+                }))
+            })
+        }
 
         let answer = generate3Cycles(cycles, slice, cubeSize);
 
@@ -78,21 +87,9 @@ export function solveEdgeStickers(moves, cubeSize) {
     return solution;
 }
 
-
-// function generate3Cycles(cycles, slice, cubeSize, a, b, c, d) {
-
 function generate3Cycles(cycles, slice, cubeSize) {
 
     let misplacedStickerCycles = [];
-
-    let a = cubeSize - 1 - slice;
-    let b = cubeSize * slice;
-    let c = (cubeSize * cubeSize - 1) - (cubeSize * slice);
-    let d = (cubeSize * (cubeSize - 1) + slice);
-
-    //compute property names for each slice position
-    var mapObj = { [a]: "a", [b]: "b", [c]: "c", [d]: "d" };
-    var re = new RegExp("(" + Object.keys(mapObj).join("|") + ")\\b", "gi"); // Word boundary at end to match only entire numbers
 
     for (let i in cycles) {
         if (cycles[i].length > 1) {
@@ -106,15 +103,9 @@ function generate3Cycles(cycles, slice, cubeSize) {
 
     for (let cycle in misplacedStickerCycles) {
         for (let innercycle in misplacedStickerCycles[cycle]) {
-            let cycle1 = misplacedStickerCycles[cycle][innercycle].replace(re, function (matched) {
-                return mapObj[matched];
-            });
-            individualStickers.push(["Da", cycle1])
+            individualStickers.push(["Da", misplacedStickerCycles[cycle][innercycle]])
         }
-        let cycle1 = misplacedStickerCycles[cycle][0].replace(re, function (matched) {
-            return mapObj[matched];
-        });
-        individualStickers.push(["Da", cycle1])
+        individualStickers.push(["Da", misplacedStickerCycles[cycle][0]])
     }
 
     // console.log("Individual Out of Place Stickers")
