@@ -23,7 +23,9 @@
       <div>
         <h2>Setup</h2>
       </div>
-      <textarea id="InitialState" placeholder="[Enter Setup Moves] [OnChange Create new CubeState]"></textarea>
+      <textarea id="InitialState" placeholder="[Enter Setup Moves]"></textarea>
+      <button id="solveCube" type ="button" class="btn btn-primary">Solve Cube</button>
+
     </div>
 
     <!-- Solution to the initial state will be printed here -->
@@ -40,6 +42,44 @@
         <h2>Explanations</h2>
       </div>
       <textarea readonly id="Explanations" placeholder="[Explanations]"></textarea>
+      <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+              Replace Explanations Here?
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              [A:B] = ABA'
+              [A,B] = ABAB'
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Solve Corners and Center Edges using Kociemba by Cubejs
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed consequat felis. Sed magna sem, fringilla a consectetur eleifend, laoreet a lacus. Suspendisse quis neque ipsum. Nulla pellentesque laoreet malesuada. Sed luctus dapibus scelerisque. Duis nulla lorem, commodo pulvinar lorem ut, rutrum maximus nibh. Proin pulvinar augue id ante posuere rhoncus. Duis lacinia nibh eget congue aliquet.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              Solve Edge Pieces using Commutators
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed consequat felis. Sed magna sem, fringilla a consectetur eleifend, laoreet a lacus. Suspendisse quis neque ipsum. Nulla pellentesque laoreet malesuada. Sed luctus dapibus scelerisque. Duis nulla lorem, commodo pulvinar lorem ut, rutrum maximus nibh. Proin pulvinar augue id ante posuere rhoncus. Duis lacinia nibh eget congue aliquet.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- User Options Placed Here -->
@@ -50,7 +90,7 @@
       <button id="solveCornerPieceButton" type="button" class="btn btn-primary">Solve Corner Pieces and Center Edges</button>
       <button id="adjustInnerSliceButton" type="button" class="btn btn-primary">Adjust Inner Slices</button>
       <button id="solveSliceButton" type="button" class="btn btn-primary">Solve Slices</button>
-
+      <button id="solveCube" type ="button" class="btn btn-primary">Solve Cube</button>
     </div>
     <!-- Area for Cube Settings, ie. Size -->
     <div>
@@ -83,7 +123,7 @@
       <button id="rotateButton2" type="button" class="btn btn-primary">X</button>
       <button id="rotateButton3" type="button" class="btn btn-primary">Z</button>
       <button id="rotateButton4" type="button" class="btn btn-primary">Test All</button>
-
+      <button id="printCube" type ="button" class="btn btn-primary">Print Cube Test</button>
     </div>
 
     <!-- Toggle for CubeState Representation -->
@@ -108,44 +148,6 @@
       <div class="B button" value="0x009e73" id=""></div>
     </div>
 
-    <div class="accordion" id="accordionExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-            Replace Explanations Here?
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            [A:B] = ABA'
-            [A,B] = ABAB'
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-            Solve Corners and Center Edges using Kociemba by Cubejs
-          </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed consequat felis. Sed magna sem, fringilla a consectetur eleifend, laoreet a lacus. Suspendisse quis neque ipsum. Nulla pellentesque laoreet malesuada. Sed luctus dapibus scelerisque. Duis nulla lorem, commodo pulvinar lorem ut, rutrum maximus nibh. Proin pulvinar augue id ante posuere rhoncus. Duis lacinia nibh eget congue aliquet.
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingThree">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-            Solve Edge Pieces using Commutators
-          </button>
-        </h2>
-        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed consequat felis. Sed magna sem, fringilla a consectetur eleifend, laoreet a lacus. Suspendisse quis neque ipsum. Nulla pellentesque laoreet malesuada. Sed luctus dapibus scelerisque. Duis nulla lorem, commodo pulvinar lorem ut, rutrum maximus nibh. Proin pulvinar augue id ante posuere rhoncus. Duis lacinia nibh eget congue aliquet.</div>
-        </div>
-      </div>
-    </div>
   </div>
 
 

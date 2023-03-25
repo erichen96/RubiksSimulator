@@ -23,8 +23,7 @@ export function solveEdgeStickers(moves, cubeSize) {
 
     let solution = [];
 
-    for (let slice = 1; slice < Math.floor(cubeSize / 2); slice++) {
-
+    for (let slice = 1; slice <= Math.floor(cubeSize / 2); slice++) {
         //Solve for Da
         let a = cubeSize - 1 - slice;
         let b = cubeSize * slice;
@@ -74,9 +73,13 @@ export function solveEdgeStickers(moves, cubeSize) {
         console.log("Edge Solutions")
         console.log(solution)
 
-        return solution
     }
+
+    return solution;
 }
+
+
+// function generate3Cycles(cycles, slice, cubeSize, a, b, c, d) {
 
 function generate3Cycles(cycles, slice, cubeSize) {
 

@@ -424,7 +424,7 @@ export function generateMovesPlacement(inputString, cubeSize) {
         moves.apply_state(global_moves[stringArray[i]])
     }
     console.log(moves.perm.perm);
-    displayCubeState(moves.perm.perm)
+    // displayCubeState(moves.perm.perm)
     return moves;
 }
 
@@ -566,16 +566,10 @@ export function getInnerSlicePiece(cubeSize, slice, moves) {
 
     let movesPerm = moves.perm.perm;
     for (let f in turns) {
-        // sliceStickers[turns[f] + slice] = moves[turns[f] + slice];
         sliceStickers[turns[f] + ((cubeSize - 1 - slice))] = movesPerm[turns[f] + ((cubeSize - 1 - slice))];
         sliceStickers[turns[f] + (cubeSize * slice)] = movesPerm[turns[f] + (cubeSize * slice)];
-        // sliceStickers[turns[f] + ((cubeSize - 1) + (cubeSize * slice))] = movesPerm[turns[f] + ((cubeSize - 1) + (cubeSize * slice))];
-
-        // sliceStickers[turns[f] + (cubeSize * (cubeSize - (slice + 1)))] = movesPerm[turns[f] + (cubeSize * (cubeSize - (slice + 1)))];
         sliceStickers[turns[f] + ((cubeSize * cubeSize - 1) - (cubeSize * slice))] = movesPerm[turns[f] + ((cubeSize * cubeSize - 1) - (cubeSize * slice))];
         sliceStickers[turns[f] + ((cubeSize * (cubeSize - 1) + slice))] = movesPerm[turns[f] + ((cubeSize * (cubeSize - 1) + slice))];
-        // sliceStickers[turns[f] + ((cubeSize * cubeSize) - (1 + slice))] = movesPerm[turns[f] + ((cubeSize * cubeSize) - (1 + slice))];
-
     }
     return sliceStickers;
 
@@ -593,4 +587,42 @@ function displayCubeState(cubeState) {
 export function generateEdgeSolution(cubeSize) {
     let solution = solveEdgeStickers(moves, cubeSize);
     return solution;
+}
+
+export function getXCenterPieces(cubeSize, slice, moves){
+    let xCenterStickers = [];
+    let turns = ["U", "R", "F", "D", "L", "B"];
+
+    console.log(moves)
+    console.log(cubeSize);
+    console.log(slice)
+    let movesPerm = moves.perm.perm;
+    console.log(movesPerm)
+    for(let f in turns){
+        xCenterStickers[turns[f] + ((cubeSize + 1) * slice)] = movesPerm[turns[f] + (((cubeSize + 1) * slice))];
+        xCenterStickers[turns[f] + ((cubeSize - 1) * (slice + 1))] = movesPerm[turns[f] + ((cubeSize - 1) * (slice + 1))];
+        xCenterStickers[turns[f] + (((cubeSize - 1) * cubeSize) - (slice * (cubeSize - 1)))] = movesPerm[turns[f] + (((cubeSize - 1) * cubeSize) - (slice * (cubeSize - 1)))]
+        xCenterStickers[turns[f] + (((cubeSize * cubeSize) - 1) - (slice * (cubeSize + 1)))] = movesPerm[turns[f] + (((cubeSize * cubeSize) - 1) - (slice * (cubeSize + 1)))];
+    }
+    return xCenterStickers;
+
+    
+}
+
+export function getTCenterPieces(cubeSize, slice, moves){
+    let tCenterStickers = [];
+    let turns = ["U", "R", "F", "D", "L", "B"];
+    let movesPerm = moves.perm.perm;
+    for(let f in turns){
+        tCenterStickers[turns[f] + ((Math.floor(cubeSize/2) + (cubeSize * slice)))] = movesPerm[turns[f] + ((Math.floor(cubeSize/2) + (cubeSize * slice)))]; //A
+        tCenterStickers[turns[f] + (((Math.ceil(cubeSize/2) * cubeSize) - 1) - slice)] = movesPerm[turns[f] + (((Math.ceil(cubeSize/2) * cubeSize) - 1) - slice)]; //B
+        tCenterStickers[turns[f] + ((Math.floor(cubeSize/2) * cubeSize) + slice)] = movesPerm[turns[f] + ((Math.floor(cubeSize/2) * cubeSize) + slice)]; //C
+        tCenterStickers[turns[f] + (((cubeSize * cubeSize) - Math.ceil(cubeSize/2)) - (cubeSize * slice))] = movesPerm[turns[f] + (((cubeSize * cubeSize) - Math.ceil(cubeSize/2)) - (cubeSize * slice))]; //D
+    }
+
+    return tCenterStickers;
+}
+
+export function testX(){
+    console.log(getTCenterPieces(9, 2, moves));
 }

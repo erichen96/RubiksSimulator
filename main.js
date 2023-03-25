@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution } from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, testX} from './cubestate';
 import { userInputToCube } from './cubejs';
 import { solveEdgeStickers } from './solveEdgePieces';
 
@@ -111,13 +111,13 @@ function updateInitialInputState(e) {
 //Call this function when appending to any textarea to expand with input
 function updateTextAreaSize() {
 	solutionTextArea.style.height = ""; /* Reset the height*/
-	solutionTextArea.style.height = Math.min(solutionTextArea.scrollHeight, heightLimit) + "px";
+	solutionTextArea.style.height = Math.min(solutionTextArea.scrollHeight, heightLimit) + 10 + "px";
 
 	initialState.style.height = ""; /* Reset the height*/
-	initialState.style.height = Math.min(initialState.scrollHeight, heightLimit) + "px";
+	initialState.style.height = Math.min(initialState.scrollHeight, heightLimit) + 10 + "px";
 
 	explanationTextArea.style.height = ""; /* Reset the height*/
-	explanationTextArea.style.height = Math.min(explanationTextArea.scrollHeight, heightLimit) + "px";
+	explanationTextArea.style.height = Math.min(explanationTextArea.scrollHeight, heightLimit) + 10 + "px";
 }
 
 // ------------------------------- Cube Functions -------------------------------
@@ -454,6 +454,39 @@ $("#solveSliceButton").click(function () {
 	updateTextAreaSize()
 })
 
+$("#solveCube").click(function (){
+	var text = document.getElementById("InitialState").value;
+	var Kociemba = generateKociembaStateToString(text, cubeSize);
+	var KociembaSolution = userInputToCube(Kociemba[0])
+	onTextSolveSticker(KociembaSolution, cubeSize);
+	solutionTextArea.value = (KociembaSolution)
+	explanationTextArea.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+
+
+	let innerslices = Math.floor(cubeSize / 2);
+	for (let i = 1; i < innerslices; i++) {
+		let fix = adjustInnerSlices(cubeSize, i);
+		if (fix[0] == 0) {
+			// solutionTextArea.value = (solutionTextArea.value + '\n')
+			explanationTextArea.value = (explanationTextArea.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
+		} else {
+			onTextSolveSticker(fix[0], cubeSize);
+			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
+			explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
+		}
+	}
+
+	let solution = generateEdgeSolution(cubeSize)
+	console.log(solution)
+	solution.forEach(element => {
+		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
+		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		onTextSolveSticker(element[1], cubeSize)
+	});
+
+	updateTextAreaSize()
+})
+
 
 
 function rotate(face, order) {
@@ -666,3 +699,6 @@ var cubeSize = 5;
 createCube(cubeSize);
 generateCubeState(cubeSize);
 
+$("#printCube").click(function () {
+	testX();
+})
