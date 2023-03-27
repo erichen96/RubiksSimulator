@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, testX} from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateXCenterSolution} from './cubestate';
 import { userInputToCube } from './cubejs';
 import { solveEdgeStickers } from './solveEdgePieces';
 
@@ -476,13 +476,22 @@ $("#solveCube").click(function (){
 		}
 	}
 
-	let solution = generateEdgeSolution(cubeSize)
-	console.log(solution)
+	//Solve Edge Stickers
+	let solution = generateEdgeSolution(cubeSize);
 	solution.forEach(element => {
 		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
 		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
 		onTextSolveSticker(element[1], cubeSize)
 	});
+
+
+	//Solve X-Center Stickers
+	let xCenterSolution = generateXCenterSolution(cubeSize);
+	xCenterSolution.forEach(element => {
+		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
+		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		onTextSolveSticker(element[1], cubeSize)
+	})
 
 	updateTextAreaSize()
 })
@@ -698,7 +707,3 @@ var cubeSize = 5;
 
 createCube(cubeSize);
 generateCubeState(cubeSize);
-
-$("#printCube").click(function () {
-	testX();
-})

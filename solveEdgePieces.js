@@ -33,10 +33,10 @@ export function solveEdgeStickers(moves, cubeSize) {
         var mapObj = { [a]: "a", [b]: "b", [c]: "c", [d]: "d" };
         var re = new RegExp("(" + Object.keys(mapObj).join("|") + ")\\b", "gi"); // Word boundary at end to match only entire numbers
 
-        if (moves.perm.perm['D' + (cubeSize - 1 - slice)] != ('D' + (cubeSize - 1 - slice))) {
-            if (moves.perm.perm['D' + (cubeSize - 1 - slice)] == ("U" + (cubeSize - 1 - slice))) {
+        if (moves.perm.perm['D' + a] != ('D' + a)) {
+            if (moves.perm.perm['D' + a] == ("U" + a)) {
                 //Apply Da Ub Dest[Da]
-                let fixDa = "Da Ub " + moves.perm.perm['D' + (cubeSize - 1 - slice)].replace(re, function (matched) {
+                let fixDa = "Da Ub " + moves.perm.perm['D' + a].replace(re, function (matched) {
                     return mapObj[matched]
                 })
 
@@ -45,7 +45,7 @@ export function solveEdgeStickers(moves, cubeSize) {
                 appendInformation(fixMoveSet, "[Solve Da] [" + fixDa + "] ")
             } else {
                 //Apply Da Ua Dest[Da]
-                let fixDa = "Da Ua " + moves.perm.perm['D' + (cubeSize - 1 - slice)].replace(re, function (matched) {
+                let fixDa = "Da Ua " + moves.perm.perm['D' + a].replace(re, function (matched) {
                     return mapObj[matched]
                 })
 
@@ -73,7 +73,7 @@ export function solveEdgeStickers(moves, cubeSize) {
             })
         }
 
-        let answer = generate3Cycles(cycles, slice, cubeSize);
+        let answer = generate3Cycles(cycles,"Da");
 
         answer.forEach((element, index) => {
             solution.push([answer[index], edge_comms.get(element).replace(/n/g, slice + 1)])
@@ -87,7 +87,7 @@ export function solveEdgeStickers(moves, cubeSize) {
     return solution;
 }
 
-function generate3Cycles(cycles, slice, cubeSize) {
+export function generate3Cycles(cycles, solvedSticker) {
 
     let misplacedStickerCycles = [];
 
@@ -103,9 +103,9 @@ function generate3Cycles(cycles, slice, cubeSize) {
 
     for (let cycle in misplacedStickerCycles) {
         for (let innercycle in misplacedStickerCycles[cycle]) {
-            individualStickers.push(["Da", misplacedStickerCycles[cycle][innercycle]])
+            individualStickers.push([solvedSticker, misplacedStickerCycles[cycle][innercycle]])
         }
-        individualStickers.push(["Da", misplacedStickerCycles[cycle][0]])
+        individualStickers.push([solvedSticker, misplacedStickerCycles[cycle][0]])
     }
 
     // console.log("Individual Out of Place Stickers")

@@ -1,3 +1,4 @@
+import { solveXCenterStickers } from './solveCenterPieces';
 import { solveEdgeStickers } from './solveEdgePieces';
 
 // ------------------------------- Util Functions -------------------------------
@@ -478,7 +479,6 @@ export function generateKociembaStateToString(inputString, cubeSize) {
 
 export function adjustInnerSlices(cubeSize, slice) {
     if (parity(getInnerSlicePiece(cubeSize, slice, moves)) == 1) {
-        console.log(slice + 1 + "R");
         return [slice + 1 + "R", parity(getInnerSlicePiece(cubeSize, slice, moves))];
     }
 
@@ -585,19 +585,19 @@ function displayCubeState(cubeState) {
 }
 
 export function generateEdgeSolution(cubeSize) {
-    let solution = solveEdgeStickers(moves, cubeSize);
+    let solution = solveEdgeStickers(moves, parseInt(cubeSize));
     return solution;
+}
+
+export function generateXCenterSolution(cubeSize){
+    let solution = solveXCenterStickers(moves, parseInt(cubeSize));
+    return solution
 }
 
 export function getXCenterPieces(cubeSize, slice, moves){
     let xCenterStickers = [];
     let turns = ["U", "R", "F", "D", "L", "B"];
-
-    console.log(moves)
-    console.log(cubeSize);
-    console.log(slice)
     let movesPerm = moves.perm.perm;
-    console.log(movesPerm)
     for(let f in turns){
         xCenterStickers[turns[f] + ((cubeSize + 1) * slice)] = movesPerm[turns[f] + (((cubeSize + 1) * slice))];
         xCenterStickers[turns[f] + ((cubeSize - 1) * (slice + 1))] = movesPerm[turns[f] + ((cubeSize - 1) * (slice + 1))];
@@ -605,8 +605,6 @@ export function getXCenterPieces(cubeSize, slice, moves){
         xCenterStickers[turns[f] + (((cubeSize * cubeSize) - 1) - (slice * (cubeSize + 1)))] = movesPerm[turns[f] + (((cubeSize * cubeSize) - 1) - (slice * (cubeSize + 1)))];
     }
     return xCenterStickers;
-
-    
 }
 
 export function getTCenterPieces(cubeSize, slice, moves){
@@ -621,8 +619,4 @@ export function getTCenterPieces(cubeSize, slice, moves){
     }
 
     return tCenterStickers;
-}
-
-export function testX(){
-    console.log(getTCenterPieces(9, 2, moves));
 }
