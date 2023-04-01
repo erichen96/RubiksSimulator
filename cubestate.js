@@ -1,5 +1,7 @@
+import { randInt } from 'three/src/math/MathUtils';
 import { solveXCenterStickers } from './solveCenterPieces';
 import { solveEdgeStickers } from './solveEdgePieces';
+import { solveAllCenterStickers } from './solveAllCenterPieces';
 
 // ------------------------------- Util Functions -------------------------------
 
@@ -163,7 +165,6 @@ export function generateCubeState(cubeSize) {
     global_moves = {}
 
     let baseMoves = ["U", "F", "R", "B", "L", "D"];
-    let baseMoveOpposingSide = ["D", "B", "L", "F", "R", "U"]
 
 
     generateRotationF(cubeSize);
@@ -174,9 +175,8 @@ export function generateCubeState(cubeSize) {
     generateRotationD(cubeSize);
 
 
-    baseMoves.forEach((element, index) => {
+    baseMoves.forEach((element) => {
         generateFaceRotation(String(element), cubeSize)
-        generateLastFaceRotation(element, cubeSize, index)
     })
 
     baseMoves.forEach(move => {
@@ -231,7 +231,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationF(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceUr[n - k], faceRc[k - 1])
             map = mapTwo(map, faceRc[k - 1], [...faceDr[k - 1]].reverse())
@@ -256,7 +256,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationU(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceFr[k - 1], faceLr[k - 1])
             map = mapTwo(map, faceLr[k - 1], faceBr[k - 1])
@@ -280,7 +280,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationR(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceFc[n - k], faceUc[n - k])
             map = mapTwo(map, faceUc[n - k], [...faceBc[k - 1]].reverse())
@@ -304,7 +304,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationL(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceFc[k - 1], faceDc[k - 1])
             map = mapTwo(map, faceDc[k - 1], [...faceBc[n - k]].reverse())
@@ -328,7 +328,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationB(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceUr[k - 1], [...faceLc[k - 1]].reverse())
             map = mapTwo(map, [...faceLc[k - 1]].reverse(), [...faceDr[n - k]].reverse())
@@ -353,7 +353,7 @@ export function generateCubeState(cubeSize) {
     }
 
     function generateRotationD(n) {
-        for (var k = 1; k <= n; k++) {
+        for (var k = 1; k <= Math.floor(n/2); k++) {
             var map = new CubeState(n);
             map = mapTwo(map, faceFr[n - k], faceRr[n - k])
             map = mapTwo(map, faceRr[n - k], faceBr[n - k])
@@ -393,27 +393,32 @@ export function generateCubeState(cubeSize) {
         global_moves[face] = map
         global_moves["1" + face] = map
 
-    }
+        const double = new CubeState(cubeSize);
+        double.apply_state(global_moves["1" + face])
+        double.apply_state(global_moves["1" + face])
+        global_moves["1" + face + "2"] = double;
 
-    function generateLastFaceRotation(frontFace, cubeSize, index) {
-        let face = baseMoveOpposingSide[index];
-        let Row = faceRow(face, cubeSize);
-        let Column = faceColumn(face, cubeSize)
-
-        const map = new CubeState(cubeSize);
-
-        for (var i = 0; i < cubeSize; i++) {
-            for (var j = 0; j < cubeSize; j++) {
-                map.perm.perm[Column[cubeSize - 1 - i][j]] = Row[i][j]
-            }
-        }
-
-        map.apply_state(global_moves[cubeSize + frontFace])
-        global_moves[cubeSize + frontFace] = map
+        const triple = new CubeState(cubeSize);
+        triple.apply_state(global_moves["1" + face])
+        triple.apply_state(global_moves["1" + face])
+        triple.apply_state(global_moves["1" + face])
+        global_moves["1" + face + "3"] = triple;
+        global_moves["1" + face + "'"] = triple;
 
     }
+
 }
 
+export function generateRandomMoves(cubeSize){
+    let randomArray = [];
+    console.log(global_moves)
+    for(let i = 0; i < (3 * (cubeSize * cubeSize)); i++){
+        let j = randInt(1, Object.keys(global_moves).length - 1);
+        randomArray.push(Object.keys(global_moves)[j])
+    }
+    
+    return randomArray.join(' ');
+}
 // Apply given set of moves onto the cube
 export function generateMovesPlacement(inputString, cubeSize) {
     inputString = inputString.replace(/[\r\n]/g, " ");
@@ -470,11 +475,13 @@ export function generateKociembaStateToString(inputString, cubeSize) {
 
         } else {
             // ExplanationTextArea.val("Parity of Corner and Center Edges: [" + sticker2piece(moves, cubeSize) + "] [Generated 3x3 from corner stickers for Kociemba][Solve Corner/ Edges with Kociemba]");
-
         }
 
     }
+    
+    // console.log(sticker2piece(moves, cubeSize))
     return [KociembaString, sticker2piece(moves, cubeSize)];
+    // return KociembaString;
 }
 
 export function adjustInnerSlices(cubeSize, slice) {
@@ -619,4 +626,28 @@ export function getTCenterPieces(cubeSize, slice, moves){
     }
 
     return tCenterStickers;
+}
+
+export function getNMCenterPieces(cubeSize, m, n, moves){
+    let nmCenterStickers = [];
+    let turns = ["U", "R", "F", "D", "L", "B"];
+    console.log(((cubeSize + n) + (cubeSize * (m - 1))))
+    console.log(((cubeSize * (n + 1)) - 1) - m)
+    console.log((((cubeSize - (n + 1)) * cubeSize) + m))
+    console.log(((((cubeSize * cubeSize) - 1) - (cubeSize * m)) - n))
+    let movesPerm = moves.perm.perm;
+    for(let f in turns){
+        nmCenterStickers[turns[f] + ((cubeSize + n) + (cubeSize * (m - 1)))] = movesPerm[turns[f] + ((cubeSize + n) + (cubeSize * (m - 1)))];
+        nmCenterStickers[turns[f] + (((cubeSize * (n + 1)) - 1) - m)] = movesPerm[turns[f] + (((cubeSize * (n + 1)) - 1) - m)];
+        nmCenterStickers[turns[f] + (((cubeSize - (n + 1)) * cubeSize) + m)] = movesPerm[turns[f] + (((cubeSize - (n + 1)) * cubeSize) + m)];
+        nmCenterStickers[turns[f] + ((((cubeSize * cubeSize) - 1) - (cubeSize * m)) - n)] = movesPerm[turns[f] + ((((cubeSize * cubeSize) - 1) - (cubeSize * m)) - n)];
+
+    }
+
+    return nmCenterStickers;
+}
+
+export function generateNMCenterSolution(cubeSize){
+    let solution = solveAllCenterStickers(moves, parseInt(cubeSize));
+    return solution;
 }
