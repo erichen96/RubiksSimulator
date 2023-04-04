@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateXCenterSolution} from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateRandomMoves, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateXCenterSolution, generateNMCenterSolution } from './cubestate';
 import { userInputToCube } from './cubejs';
 import { solveEdgeStickers } from './solveEdgePieces';
 
@@ -72,9 +72,17 @@ function updateControls(cubeSize) {
 // Initial State TextArea
 var initialState = document.getElementById('InitialState');
 initialState.addEventListener('input', updateInitialInputState);
-var explanationTextArea = document.getElementById("Explanations")
+var explanationTextAreaCCE = document.getElementById("CCEExplanations")
+var explanationTextAreaEP = document.getElementById("EPExplanations")
+var explanationTextAreaCP = document.getElementById("CPExplanations")
+
 var solutionTextArea = document.getElementById("SolutionState");
 var heightLimit = 200; /* Maximum height: 200px */
+
+var accordionOne = document.getElementById('headingOne')
+var accordionTwo = document.getElementById('headingTwo')
+var accordionThree = document.getElementById('headingThree')
+
 
 initialState.oninput = function () {
 	updateTextAreaSize();
@@ -83,7 +91,7 @@ initialState.oninput = function () {
 //Append additional information from minor functions
 export function appendInformation(movesString, explanation) {
 	solutionTextArea.value = (solutionTextArea.value + '\n' + movesString)
-	explanationTextArea.value = (explanationTextArea.value) + '\n' + explanation + movesString;
+	explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + explanation + movesString;
 }
 
 // OnChange Update Cube to new State by User Input
@@ -93,17 +101,17 @@ function updateInitialInputState(e) {
 		createCube(cubeSize);
 		generateCubeState(cubeSize);
 		solutionTextArea.value = "";
-		explanationTextArea.value = "";
+		explanationTextAreaCCE.value = "";
 
 	} else {
 		try {
 			onTextInputApplySticker(e.target.value, cubeSize);
 			solutionTextArea.value = "";
-			explanationTextArea.value = "";
+			explanationTextAreaCCE.value = "";
 		} catch (error) {
 			// console.log(error);
 			solutionTextArea.value = "";
-			explanationTextArea.value = "";
+			explanationTextAreaCCE.value = "";
 		}
 	}
 }
@@ -116,8 +124,19 @@ function updateTextAreaSize() {
 	initialState.style.height = ""; /* Reset the height*/
 	initialState.style.height = Math.min(initialState.scrollHeight, heightLimit) + 10 + "px";
 
-	explanationTextArea.style.height = ""; /* Reset the height*/
-	explanationTextArea.style.height = Math.min(explanationTextArea.scrollHeight, heightLimit) + 10 + "px";
+	explanationTextAreaCCE.style.height = ""; /* Reset the height*/
+	explanationTextAreaCCE.style.height = Math.min(explanationTextAreaCCE.scrollHeight, heightLimit) + 50 + "px";
+
+
+	explanationTextAreaEP.style.height = ""; /* Reset the height*/
+	explanationTextAreaEP.style.height = Math.max(explanationTextAreaEP.scrollHeight, heightLimit) + 10 + "px";
+
+	// explanationTextAreaEP.style.height = (numberOfEdgeSolutions * 40) + 'px'
+
+	// accordionOne.style.height = explanationTextAreaCCE.scrollHeight + 'px'
+	// accordionTwo.style.height = (numberOfEdgeSolutions * 20)  + 'px'
+
+
 }
 
 // ------------------------------- Cube Functions -------------------------------
@@ -334,7 +353,7 @@ function onTextInputApplySticker(string, cubeSize) {
 	}
 }
 
-function onTextSolveSticker(string, cubeSize) {
+export function onTextSolveSticker(string, cubeSize) {
 	let moves = applyState(string, cubeSize);
 	moves = moves.perm.perm;
 	// console.log(moves);
@@ -408,7 +427,7 @@ $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 	cubeSize = menu;
 	initialState.value = "";
 	solutionTextArea.value = "";
-	explanationTextArea.value = "";
+	explanationTextAreaCCE.value = "";
 });
 
 
@@ -420,7 +439,7 @@ $("#solveCornerPieceButton").click(function () {
 	var KociembaSolution = userInputToCube(Kociemba[0])
 	onTextSolveSticker(KociembaSolution, cubeSize);
 	solutionTextArea.value = (KociembaSolution)
-	explanationTextArea.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	explanationTextAreaCCE.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
 	updateTextAreaSize()
 
 })
@@ -431,11 +450,11 @@ $("#adjustInnerSliceButton").click(function () {
 		let fix = adjustInnerSlices(cubeSize, i);
 		if (fix[0] == 0) {
 			// solutionTextArea.value = (solutionTextArea.value + '\n')
-			explanationTextArea.value = (explanationTextArea.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
+			explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
 		} else {
 			onTextSolveSticker(fix[0], cubeSize);
 			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
-			explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
+			explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
 		}
 		updateTextAreaSize()
 	}
@@ -447,7 +466,7 @@ $("#solveSliceButton").click(function () {
 	console.log(solution)
 	solution.forEach(element => {
 		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		explanationTextAreaCCE.value = (explanationTextAreaCCE.value + '\n' + element[0])
 		onTextSolveSticker(element[1], cubeSize)
 	});
 
@@ -460,40 +479,65 @@ $("#solveCube").click(function (){
 	var KociembaSolution = userInputToCube(Kociemba[0])
 	onTextSolveSticker(KociembaSolution, cubeSize);
 	solutionTextArea.value = (KociembaSolution)
-	explanationTextArea.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	explanationTextAreaCCE.innerHTML = "CCE";
+	explanationTextAreaEP.innerHTML = "EP";
+	explanationTextAreaCP.innerHTML = "CP";
 
+	explanationTextAreaCCE.innerHTML += "<br>" + ("Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	explanationTextAreaCCE.innerHTML += "<br>" + KociembaSolution;
 
 	let innerslices = Math.floor(cubeSize / 2);
 	for (let i = 1; i < innerslices; i++) {
 		let fix = adjustInnerSlices(cubeSize, i);
 		if (fix[0] == 0) {
 			// solutionTextArea.value = (solutionTextArea.value + '\n')
-			explanationTextArea.value = (explanationTextArea.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
+			explanationTextAreaCCE.innerHTML = (explanationTextAreaCCE.innerHTML) + '<br>' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
 		} else {
 			onTextSolveSticker(fix[0], cubeSize);
-			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
-			explanationTextArea.value = (explanationTextArea.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
+			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0])
+
+			// solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
+			explanationTextAreaCCE.innerHTML = (explanationTextAreaCCE.innerHTML) + '<br>' + "Parity of Inner Slice " + i + " was [1]" + "<br>" + fix[0];
 		}
 	}
+
 
 	//Solve Edge Stickers
 	let solution = generateEdgeSolution(cubeSize);
 	solution.forEach(element => {
 		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		explanationTextAreaEP.innerHTML = (explanationTextAreaEP.innerHTML + '<br>' + element[0] + ": " + element[1])
 		onTextSolveSticker(element[1], cubeSize)
 	});
 
 
-	//Solve X-Center Stickers
-	let xCenterSolution = generateXCenterSolution(cubeSize);
-	xCenterSolution.forEach(element => {
+	let centerSolution = generateNMCenterSolution(cubeSize);
+	console.log("CENTER SOLUTIONS")
+	console.log(centerSolution)
+	centerSolution.forEach(element => {
 		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-		explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+		explanationTextAreaCP.innerHTML = (explanationTextAreaCP.innerHTML + '<br>' + element[0] + ": " + element[1])
 		onTextSolveSticker(element[1], cubeSize)
-	})
+	});
+
+	// //Solve X-Center Stickers
+	// let xCenterSolution = generateXCenterSolution(cubeSize);
+	// xCenterSolution.forEach(element => {
+	// 	solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
+	// 	explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
+	// 	onTextSolveSticker(element[1], cubeSize)
+	// })
+	
 
 	updateTextAreaSize()
+})
+
+$("#randomizeCube").click(function (){
+	// generateRandomMoves(cubeSize);
+	initialState.value = generateRandomMoves(cubeSize);
+	let randomInitialState = document.getElementById("InitialState")
+	var event = new Event('input')
+	randomInitialState.dispatchEvent(event);
 })
 
 
@@ -707,3 +751,15 @@ var cubeSize = 5;
 
 createCube(cubeSize);
 generateCubeState(cubeSize);
+
+$("#TestButton").click(function () {
+	
+	let solution = generateNMCenterSolution(cubeSize);
+	console.log("CENTER SOLUTIONS")
+	console.log(solution)
+	solution.forEach(element => {
+		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
+		explanationTextAreaCCE.value = (explanationTextAreaCCE.value + '\n' + element[0])
+		onTextSolveSticker(element[1], cubeSize)
+	});
+})

@@ -42,7 +42,7 @@ export function solveEdgeStickers(moves, cubeSize) {
 
                 let fixMoveSet = edge_comms.get(fixDa).replace(/n/g, slice + 1)
                 applyState(fixMoveSet, cubeSize);
-                appendInformation(fixMoveSet, "[Solve Da] [" + fixDa + "] ")
+                appendInformation(fixMoveSet, "[Solve Edge Da] [" + fixDa + "] ")
             } else {
                 //Apply Da Ua Dest[Da]
                 let fixDa = "Da Ua " + moves.perm.perm['D' + a].replace(re, function (matched) {
@@ -51,18 +51,18 @@ export function solveEdgeStickers(moves, cubeSize) {
 
                 let fixMoveSet = edge_comms.get(fixDa).replace(/n/g, slice + 1)
                 applyState(fixMoveSet, cubeSize);
-                appendInformation(fixMoveSet, "[Solve Da] [" + fixDa + "] ")
+                appendInformation(fixMoveSet, "[Solve Edge Da] [" + fixDa + "] ")
             }
         }
 
         //Solve remaining Edge Pieces
         let innerMoves = getInnerSlicePiece(cubeSize, slice, moves);
-        console.log("Hashmap of Corners")
-        console.log(innerMoves);
+        // console.log("Hashmap of Corners")
+        // console.log(innerMoves);
 
         let cycles = cycle_decomposition(innerMoves);
-        console.log("Cycle Decomposition")
-        console.log(cycles)
+        // console.log("Cycle Decomposition")
+        // console.log(cycles)
         
         //Compute a,b,c,d for current orientation
         for(let cycle in cycles){
@@ -79,8 +79,8 @@ export function solveEdgeStickers(moves, cubeSize) {
             solution.push([answer[index], edge_comms.get(element).replace(/n/g, slice + 1)])
         });
 
-        console.log("Edge Solutions")
-        console.log(solution)
+        // console.log("Edge Solutions")
+        // console.log(solution)
 
     }
 

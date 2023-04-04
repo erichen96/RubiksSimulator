@@ -108,3 +108,14 @@ h1 {
 html, textarea {
     font-family: Verdana, Tahoma, sans-serif, Helvetica;
 }
+
+#EPExplanations, #CCEExplanations, #CPExplanations {
+    overflow-y:auto;
+    min-height: 150px;
+    max-height: 400px;
+
+}
+
+/* #CCEExplanations {
+    overflow-y:auto;
+} */
