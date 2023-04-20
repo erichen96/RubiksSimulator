@@ -119,9 +119,6 @@ class CubeState {
 
         for (let f in turns) {
             for (let i in range(1, position * position)) {
-                // if (i == 0) {
-                //     continue;
-                // }
                 let nameTurn = turns[f] + i.toString();
                 p[nameTurn] = nameTurn
             }
@@ -139,7 +136,7 @@ class CubeState {
 
 }
 
-var global_moves = {}
+var global_moves = {} //Contains the list of available moves
 var moves; //Contains the cubestate of current moves
 
 // Generate the all move sets for a cubeSize
@@ -434,7 +431,7 @@ export function generateMovesPlacement(inputString, cubeSize) {
         moves.apply_state(global_moves[stringArray[i]])
     }
     console.log(moves.perm.perm);
-    // displayCubeState(moves.perm.perm)
+    displayCubeState(moves.perm.perm)
     return moves;
 }
 
@@ -589,9 +586,9 @@ export function getInnerSlicePiece(cubeSize, slice, moves) {
 // Functions for Visuals
 // (Move to main.js and export to here?)
 function displayCubeState(cubeState) {
-    // document.getElementById("offcanvas-cubeState-String").innerHTML = "";
+    document.getElementById("offcanvas-cubeState-String").innerHTML = "";
     for (let i in cubeState) {
-        // document.getElementById("offcanvas-cubeState-String").innerHTML += "<li> " + i + " <span>&#8594;</span> " + cubeState[i]+ " </li>";
+        document.getElementById("offcanvas-cubeState-String").innerHTML += "<li> " + i + " <span>&#8594;</span> " + cubeState[i]+ " </li>";
     }
 }
 
@@ -635,10 +632,6 @@ export function getTCenterPieces(cubeSize, slice, moves){
 export function getNMCenterPieces(cubeSize, m, n, moves){
     let nmCenterStickers = [];
     let turns = ["U", "R", "F", "D", "L", "B"];
-    console.log(((cubeSize + m) + (cubeSize * (n - 1))))
-    console.log(((cubeSize * (m + 1)) - 1) - n)
-    console.log((((cubeSize - (m + 1)) * cubeSize) + n))
-    console.log(((((cubeSize * cubeSize) - 1) - (cubeSize * n)) - m))
     let movesPerm = moves.perm.perm;
     for(let f in turns){
         nmCenterStickers[turns[f] + ((cubeSize + m) + (cubeSize * (n - 1)))] = movesPerm[turns[f] + ((cubeSize + m) + (cubeSize * (n - 1)))];
@@ -654,8 +647,4 @@ export function getNMCenterPieces(cubeSize, m, n, moves){
 export function generateNMCenterSolution(cubeSize){
     let solution = solveAllCenterStickers(moves, parseInt(cubeSize));
     return solution;
-}
-
-export function getMoves(){
-    return moves;
 }

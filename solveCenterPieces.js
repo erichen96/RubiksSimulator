@@ -2,20 +2,7 @@ import { getTCenterPieces, getXCenterPieces, applyState, cycle_decomposition } f
 import { appendInformation } from "./main.js";
 import { generate3Cycles } from "./solveEdgePieces.js";
 
-//Fetch Center Comm Solutions
-// let t_comms = new Map();
 
-// const t_comms_url = new URL(var, import.meta.url).href
-// await fetch(t_comms_url)
-//     .then((response) => response.text())
-//     .then(textString => {
-//         const tcomms = textString.split(/\r?\n/);
-
-//         for (let i in tcomms) {
-//             let array = tcomms[i].split(" ");
-//             t_comms.set((array.slice(0, 3).join(' ')), (array.slice(3, array.length).join(' ')))
-//         }
-//     })
 let x_comms = new Map();
 const x_comms_url = new URL('/resources/comm-xcenters.txt', import.meta.url).href
 await fetch(x_comms_url)

@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { generateMovesPlacement, generateCubeState, generateRandomMoves, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateXCenterSolution, generateNMCenterSolution } from './cubestate';
+import { generateMovesPlacement, generateCubeState, generateRandomMoves, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateNMCenterSolution } from './cubestate';
 import { userInputToCube } from './cubejs';
-import { solveEdgeStickers } from './solveEdgePieces';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
@@ -79,19 +78,22 @@ var explanationTextAreaCP = document.getElementById("CPExplanations")
 var solutionTextArea = document.getElementById("SolutionState");
 var heightLimit = 200; /* Maximum height: 200px */
 
-var accordionOne = document.getElementById('headingOne')
-var accordionTwo = document.getElementById('headingTwo')
-var accordionThree = document.getElementById('headingThree')
-
-
 initialState.oninput = function () {
 	updateTextAreaSize();
 };
 
 //Append additional information from minor functions
-export function appendInformation(movesString, explanation) {
-	solutionTextArea.value = (solutionTextArea.value + '\n' + movesString)
-	explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + explanation + movesString;
+export function appendInformation(position, movesString, explanation) {
+	if(position == 0){
+		solutionTextArea.value = solutionTextArea.value + '\n' + movesString;
+		explanationTextAreaEP.innerHTML = explanationTextAreaEP.innerHTML + '<br>' + explanation + ": " + movesString;
+	}
+
+	if(position == 1){
+		solutionTextArea.value = solutionTextArea.value + '\n' + movesString;
+		explanationTextAreaCP.innerHTML = explanationTextAreaCP.innerHTML + '<br>' + explanation + ": " + movesString;
+	}
+	
 }
 
 // OnChange Update Cube to new State by User Input
@@ -101,17 +103,23 @@ function updateInitialInputState(e) {
 		createCube(cubeSize);
 		generateCubeState(cubeSize);
 		solutionTextArea.value = "";
-		explanationTextAreaCCE.value = "";
+		explanationTextAreaCCE.innerHTML = "";
+		explanationTextAreaEP.innerHTML = "";
+		explanationTextAreaCP.innerHTML = "";
 
 	} else {
 		try {
 			onTextInputApplySticker(e.target.value, cubeSize);
 			solutionTextArea.value = "";
-			explanationTextAreaCCE.value = "";
+			explanationTextAreaCCE.innerHTML = "";
+			explanationTextAreaEP.innerHTML = "";
+			explanationTextAreaCP.innerHTML = "";
 		} catch (error) {
 			// console.log(error);
 			solutionTextArea.value = "";
-			explanationTextAreaCCE.value = "";
+			explanationTextAreaCCE.innerHTML = "";
+			explanationTextAreaEP.innerHTML = "";
+			explanationTextAreaCP.innerHTML = "";
 		}
 	}
 }
@@ -123,19 +131,6 @@ function updateTextAreaSize() {
 
 	initialState.style.height = ""; /* Reset the height*/
 	initialState.style.height = Math.min(initialState.scrollHeight, heightLimit) + 10 + "px";
-
-	explanationTextAreaCCE.style.height = ""; /* Reset the height*/
-	explanationTextAreaCCE.style.height = Math.min(explanationTextAreaCCE.scrollHeight, heightLimit) + 50 + "px";
-
-
-	explanationTextAreaEP.style.height = ""; /* Reset the height*/
-	explanationTextAreaEP.style.height = Math.max(explanationTextAreaEP.scrollHeight, heightLimit) + 10 + "px";
-
-	// explanationTextAreaEP.style.height = (numberOfEdgeSolutions * 40) + 'px'
-
-	// accordionOne.style.height = explanationTextAreaCCE.scrollHeight + 'px'
-	// accordionTwo.style.height = (numberOfEdgeSolutions * 20)  + 'px'
-
 
 }
 
@@ -415,7 +410,6 @@ $(".button").click(function () {
 	selectedColor = $(this).attr('value');
 	$(".button").removeAttr("id");
 	$(this).attr("id", "activeColor")
-
 })
 
 // ------------------------------- Setting Functions -------------------------------
@@ -427,77 +421,39 @@ $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 	cubeSize = menu;
 	initialState.value = "";
 	solutionTextArea.value = "";
-	explanationTextAreaCCE.value = "";
+	explanationTextAreaCCE.innerHTML = "";
+	explanationTextAreaEP.innerHTML = "";
+	explanationTextAreaCP.innerHTML = "";
+
 });
 
 
-// ------------------------------- Solution Functions -------------------------------
-
-$("#solveCornerPieceButton").click(function () {
-	var text = document.getElementById("InitialState").value;
-	var Kociemba = generateKociembaStateToString(text, cubeSize);
-	var KociembaSolution = userInputToCube(Kociemba[0])
-	onTextSolveSticker(KociembaSolution, cubeSize);
-	solutionTextArea.value = (KociembaSolution)
-	explanationTextAreaCCE.value = ("[Solve Corner/ Edges with Kociemba] Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
-	updateTextAreaSize()
-
-})
-
-$("#adjustInnerSliceButton").click(function () {
-	let innerslices = Math.floor(cubeSize / 2);
-	for (let i = 1; i < innerslices; i++) {
-		let fix = adjustInnerSlices(cubeSize, i);
-		if (fix[0] == 0) {
-			// solutionTextArea.value = (solutionTextArea.value + '\n')
-			explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
-		} else {
-			onTextSolveSticker(fix[0], cubeSize);
-			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
-			explanationTextAreaCCE.value = (explanationTextAreaCCE.value) + '\n' + "Parity of Inner Slice " + i + " was [1]";
-		}
-		updateTextAreaSize()
-	}
-
-})
-
-$("#solveSliceButton").click(function () {
-	let solution = generateEdgeSolution(cubeSize)
-	console.log(solution)
-	solution.forEach(element => {
-		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-		explanationTextAreaCCE.value = (explanationTextAreaCCE.value + '\n' + element[0])
-		onTextSolveSticker(element[1], cubeSize)
-	});
-
-	updateTextAreaSize()
-})
-
+// ------------------------------- User Cube Functions -------------------------------
 $("#solveCube").click(function (){
 	var text = document.getElementById("InitialState").value;
+
+	//Solve Corners and Center Edges with Kociemba Method by CubeJS
 	var Kociemba = generateKociembaStateToString(text, cubeSize);
 	var KociembaSolution = userInputToCube(Kociemba[0])
 	onTextSolveSticker(KociembaSolution, cubeSize);
-	solutionTextArea.value = (KociembaSolution)
-	explanationTextAreaCCE.innerHTML = "CCE";
-	explanationTextAreaEP.innerHTML = "EP";
-	explanationTextAreaCP.innerHTML = "CP";
+	solutionTextArea.value = KociembaSolution
+	explanationTextAreaCCE.innerHTML = "";
+	explanationTextAreaEP.innerHTML = "[Three Cycle] : Moves";
+	explanationTextAreaCP.innerHTML = "[Three Cycle] : Moves";
 
-	explanationTextAreaCCE.innerHTML += "<br>" + ("Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
+	explanationTextAreaCCE.innerHTML += ("Parity of Corner and Center Edges: [" + Kociemba[1] + "]");
 	explanationTextAreaCCE.innerHTML += "<br>" + KociembaSolution;
 
+	//Adjust parity of inner slices
 	let innerslices = Math.floor(cubeSize / 2);
 	for (let i = 1; i < innerslices; i++) {
 		let fix = adjustInnerSlices(cubeSize, i);
 		if (fix[0] == 0) {
-			// solutionTextArea.value = (solutionTextArea.value + '\n')
 			explanationTextAreaCCE.innerHTML = (explanationTextAreaCCE.innerHTML) + '<br>' + "[No Adjustment Needed] Parity of Inner Slice " + i + " was " + fix[1];
 		} else {
 			onTextSolveSticker(fix[0], cubeSize);
 			solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0])
-
-			// solutionTextArea.value = (solutionTextArea.value + '\n' + fix[0] + " Parity of Inner Slice " + i + " was 1" + " [Adjust Inner Slice " + i + " ]")
-			explanationTextAreaCCE.innerHTML = (explanationTextAreaCCE.innerHTML) + '<br>' + "Parity of Inner Slice " + i + " was [1]" + "<br>" + fix[0];
+			explanationTextAreaCCE.innerHTML = (explanationTextAreaCCE.innerHTML) + '<br>' + "Parity of Inner Slice " + i + " was [1]: " + fix[0];
 		}
 	}
 
@@ -510,16 +466,15 @@ $("#solveCube").click(function (){
 		onTextSolveSticker(element[1], cubeSize)
 	});
 
-
+	//Solve Center Stickers
 	let centerSolution = generateNMCenterSolution(cubeSize);
-	console.log("CENTER SOLUTIONS")
-	console.log(centerSolution)
 	centerSolution.forEach(element => {
 		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
 		explanationTextAreaCP.innerHTML = (explanationTextAreaCP.innerHTML + '<br>' + element[0] + ": " + element[1])
 		onTextSolveSticker(element[1], cubeSize)
 	});
 
+	//Unused Kept for reference
 	// //Solve X-Center Stickers
 	// let xCenterSolution = generateXCenterSolution(cubeSize);
 	// xCenterSolution.forEach(element => {
@@ -527,13 +482,21 @@ $("#solveCube").click(function (){
 	// 	explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
 	// 	onTextSolveSticker(element[1], cubeSize)
 	// })
-	
-
 	updateTextAreaSize()
 })
 
+$("#resetCube").click(function (){
+	createCube(cubeSize);
+	generateCubeState(cubeSize);
+	initialState.value = "";
+	solutionTextArea.value = "";
+	explanationTextAreaCCE.innerHTML = "";
+	explanationTextAreaEP.innerHTML = "";
+	explanationTextAreaCP.innerHTML = "";
+})
+
+//Generates 3n^2 Turns at random
 $("#randomizeCube").click(function (){
-	// generateRandomMoves(cubeSize);
 	initialState.value = generateRandomMoves(cubeSize);
 	let randomInitialState = document.getElementById("InitialState")
 	var event = new Event('input')
@@ -754,12 +717,5 @@ generateCubeState(cubeSize);
 
 $("#TestButton").click(function () {
 	
-	let solution = generateNMCenterSolution(cubeSize);
-	console.log("CENTER SOLUTIONS")
-	console.log(solution)
-	solution.forEach(element => {
-		solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-		explanationTextAreaCCE.value = (explanationTextAreaCCE.value + '\n' + element[0])
-		onTextSolveSticker(element[1], cubeSize)
-	});
+	
 })

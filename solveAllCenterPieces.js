@@ -1,5 +1,5 @@
 import { applyState, cycle_decomposition, getNMCenterPieces } from "./cubestate.js";
-import { appendInformation, onTextSolveSticker } from "./main.js";
+import { appendInformation } from "./main.js";
 import { generate3Cycles } from "./solveEdgePieces.js";
 
 
@@ -33,37 +33,24 @@ export function solveAllCenterStickers(moves, cubeSize) {
             if (moves.perm.perm['U' + d] != ('U' + d)) {
                 if (moves.perm.perm['U' + d] == ('D' + a)) {
                     let fixUd = "Ud Db Da"
-                    let fixMoveSet = x_comms.get(fixUd).replace(/m/g, m + 1)
-                    let adjustNM = fixMoveSet.replace(/n/g, n + 1)
+                    let adjustNM = x_comms.get(fixUd).replace(/m/g, m + 1).replace(/n/g, (n + 1))
                     applyState(adjustNM, cubeSize);
-                    appendInformation(adjustNM, "[Solve Ud] [" + m + " ]" + "[" + n + "]" + "[" + fixUd + "] ");
-                    console.log("Ud Db Da, Ud is at Da")
-                    console.log(adjustNM, "[Solve Ud] [" + m + " ]" + "[" + n + "]" + "[" + fixUd + "] ");
+                    appendInformation( 1, adjustNM, "[Solve Ud] at Position [" + (m + 1) + "]" + "[" + (n + 1) + "] <br>" + fixUd);
 
                 } else {
                     //Apply Ud Da Dest[Ud]
                     let fixUd = "Ud Da " + moves.perm.perm['U' + d].replace(re, function (matched) {
                         return mapObj[matched];
                     })
-                    console.log("Ud Da" + moves.perm.perm['U' + d] + ", Ud is at " + moves.perm.perm['U' + d].replace(re, function (matched) {
-                        return mapObj[matched];
-                    }))
 
-                    let fixMoveSet = x_comms.get(fixUd).replace(/m/g, m + 1)
-                    let adjustNM = fixMoveSet.replace(/n/g, n + 1)
-                    console.log(adjustNM)
+                    let adjustNM = x_comms.get(fixUd).replace(/m/g, m + 1).replace(/n/g, (n + 1))
                     applyState(adjustNM, cubeSize);
-                    // appendInformation(adjustNM, "[Solve Ud] [" + fixUd + "] ");
-                    appendInformation(adjustNM, "[Solve Ud] [" + m + " ]" + "[" + n + "]" + "[" + fixUd + "] ");
+                    appendInformation( 1, adjustNM, "[Solve Ud] at Position [" + (m + 1) + "]" + "[" + (n + 1) + "] <br>" + fixUd);
                 }
             }
 
             let xCenterStickers = getNMCenterPieces(cubeSize, m, n, moves);
-            console.log("XCENTERS")
-            console.log(xCenterStickers);
-
             let cycles = cycle_decomposition(xCenterStickers);
-            console.log(cycles)
 
             for (let cycle in cycles) {
                 cycles[cycle].forEach((element, index) => {
@@ -73,20 +60,13 @@ export function solveAllCenterStickers(moves, cubeSize) {
                 })
             }
 
-            // console.log(cycles)
             let answer = generate3Cycles(cycles, "Ud")
             console.log(answer)
             answer.forEach((element, index) => {
-                let x = x_comms.get(element).replace(/m/g, (m + 1))
-                let y = x.replace(/n/g, (n + 1))
-                // console.log(y)
-                solution.push([answer[index], y])
+                let x = x_comms.get(element).replace(/m/g, (m + 1)).replace(/n/g, (n + 1))
+                solution.push([answer[index], x])
             });
-
-
         }
-
     }
     return solution;
-
 }
