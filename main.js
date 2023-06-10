@@ -399,7 +399,7 @@ function onPointerDown(event) {
 
 		console.log(intersect)
 		console.log(intersect.object.name)
-		intersect.object.material.color.setHex(selectedColor);
+		// intersect.object.material.color.setHex(selectedColor);
 		render();
 
 	}
