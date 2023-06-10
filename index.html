@@ -28,13 +28,13 @@
 
     <div class="title divcontainer">
       <div class="col-md-4">
-        <button id="solveCube" type="button" class="btn btn-secondary buttonrow">Solve Cube</button>
+        <button id="solveCube" type="button" class="btn btn-outline-dark buttonrow">Solve Cube</button>
       </div>
       <div class="col-md-4">
-        <button id="resetCube" type="button" class="btn btn-secondary buttonrow">Reset</button>
+        <button id="resetCube" type="button" class="btn btn-outline-dark buttonrow">Reset</button>
       </div>
       <div class="col-md-4">
-        <button id="randomizeCube" type="button" class="btn btn-secondary buttonrow">Scramble</button>
+        <button id="randomizeCube" type="button" class="btn btn-outline-dark buttonrow">Scramble</button>
       </div>
     </div>
 
@@ -92,13 +92,22 @@
       </div>
     </div>
 
-    <!-- User Options Placed Here -->
+    <!-- Cube State Representation Options Placed Here -->
     <div class="title">
-      <h2>User Options</h2>
+      <h2>Cube State Options</h2>
     </div>
     <div>
-      <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+      <input type="range" min="1" max="1" value="1" class="slider" id="myRange">
+      <div id="sliderAmount"></div>
+      <div id="player">
 
+      </div>
+      <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
+        aria-controls="offcanvasRight">Display CubeState</button>
+      <button type="button" class="btn btn-outline-dark" data-toggle="tooltip" data-placement="top"
+        title="Visualization works for Cube Size 4 - 7">
+        ?
+      </button>
     </div>
     <!-- Area for Cube Settings, ie. Size -->
     <div class="title">
@@ -107,7 +116,7 @@
     <div>
       <div class="cubeSizeDropDown">
         <div class="dropdown">Cube Size:
-          <button class="btn btn-secondary dropdown-toggle" id="dropdown-menu-value" type="button"
+          <button class="btn btn-outline-dark dropdown-toggle" id="dropdown-menu-value" type="button"
             data-bs-toggle="dropdown" aria-expanded="false">5x5x5</button>
           <div class="dropdown-menu" id="cubeSize" aria-labelledby="dropdownMenuLink">
             <option class="dropdown-item" value="3">3x3x3</a>
@@ -122,30 +131,11 @@
       </div>
     </div>
 
-    <!-- Space for TESTING -->
-    <div class="title">
-      <h2>Testing Area</h2>
-    </div>
-    <div>
-      <button id="rotateButton" type="button" class="btn btn-primary">Y</button>
-      <button id="rotateButton2" type="button" class="btn btn-primary">X</button>
-      <button id="rotateButton3" type="button" class="btn btn-primary">Z</button>
-      <button id="rotateButton4" type="button" class="btn btn-primary">Test All</button>
-      <button id="TestButton" type="button" class="btn btn-primary">Test</button>
 
-    </div>
 
-    <!-- Toggle for CubeState Representation -->
-    <div class="title">
-      <h2>CubeState String</h2>
-    </div>
-    <div>
-      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
-        aria-controls="offcanvasRight">Display CubeState</button>
-    </div>
 
     <!-- Area for Colorpicker, WIP -->
-    <div class="title">
+    <!-- <div class="title">
       <h2>ColorPicker Test Area</h2>
     </div>
     <div>
@@ -156,7 +146,7 @@
       <div class="R button" value="0xd55e00" id=""></div>
       <div class="F button" value="0x56b4e9" id=""></div>
       <div class="B button" value="0x009e73" id=""></div>
-    </div>
+    </div> -->
 
   </div>
 

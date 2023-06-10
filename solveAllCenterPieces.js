@@ -21,7 +21,7 @@ export function solveAllCenterStickers(moves, cubeSize) {
 
     for (let m = 1; m < Math.ceil(cubeSize / 2); m++) {
         for (let n = 1; n < Math.floor(cubeSize / 2); n++) {
-            console.log("Piece " + m + ", " + n)
+            // console.log("Piece " + m + ", " + n)
             let a = ((cubeSize + m) + (cubeSize * (n - 1)));
             let b = (((cubeSize * (m + 1)) - 1) - n);
             let c = (((cubeSize - (m + 1)) * cubeSize) + n);
@@ -29,7 +29,7 @@ export function solveAllCenterStickers(moves, cubeSize) {
 
             var mapObj = { [a]: "a", [b]: "b", [c]: "c", [d]: "d" };
             var re = new RegExp("(" + Object.keys(mapObj).join("|") + ")\\b", "gi"); // Word boundary at end to match only entire numbers
-            console.log(mapObj)
+            // console.log(mapObj)
             if (moves.perm.perm['U' + d] != ('U' + d)) {
                 if (moves.perm.perm['U' + d] == ('D' + a)) {
                     let fixUd = "Ud Db Da"
@@ -61,7 +61,7 @@ export function solveAllCenterStickers(moves, cubeSize) {
             }
 
             let answer = generate3Cycles(cycles, "Ud")
-            console.log(answer)
+            // console.log(answer)
             answer.forEach((element, index) => {
                 let x = x_comms.get(element).replace(/m/g, (m + 1)).replace(/n/g, (n + 1))
                 solution.push([answer[index], x])

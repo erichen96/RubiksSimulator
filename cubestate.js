@@ -408,7 +408,6 @@ export function generateCubeState(cubeSize) {
 
 export function generateRandomMoves(cubeSize){
     let randomArray = [];
-    console.log(global_moves)
     for(let i = 0; i < (3 * (cubeSize * cubeSize)); i++){
         let j = randInt(1, Object.keys(global_moves).length - 1);
         if(Object.keys(global_moves)[j][0] == Math.floor(cubeSize/2) + 1){
@@ -423,14 +422,12 @@ export function generateRandomMoves(cubeSize){
 // Apply given set of moves onto the cube
 export function generateMovesPlacement(inputString, cubeSize) {
     inputString = inputString.replace(/[\r\n]/g, " ");
-    console.log(inputString)
     const stringArray = inputString.split(" ");
     moves = new CubeState(cubeSize);
 
     for (var i = 0; i < stringArray.length; i++) {
         moves.apply_state(global_moves[stringArray[i]])
     }
-    console.log(moves.perm.perm);
     displayCubeState(moves.perm.perm)
     return moves;
 }

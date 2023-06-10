@@ -70,8 +70,11 @@ export function solveEdgeStickers(moves, cubeSize) {
         answer.forEach((element, index) => {
             solution.push([answer[index], edge_comms.get(element).replace(/n/g, slice + 1)])
         });
-    }
+        console.log(answer)
 
+    }
+    
+    console.log(solution)
     return solution;
 }
 
@@ -98,6 +101,8 @@ export function generate3Cycles(cycles, solvedSticker) {
     for (let i = 0; i < individualStickers.length; i += 2) {
         pairs.push(individualStickers[i], individualStickers[i + 1]);
     }
+
+    console.log(pairs)
 
     let threeCycles = []
     for (let i = 0; i <= pairs.length - 1; i += 2) {

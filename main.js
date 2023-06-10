@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { generateMovesPlacement, generateCubeState, generateRandomMoves, generateKociembaStateToString, applyState, adjustInnerSlices, generateEdgeSolution, generateNMCenterSolution } from './cubestate';
 import { userInputToCube } from './cubejs';
+import { TwistyPlayer } from "cubing/twisty";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x718072);
@@ -58,10 +59,10 @@ function updateControls(cubeSize) {
 	controls.target = new THREE.Vector3(centerPos, centerPos, centerPos);
 	controls.minDistance = cubeSize * 25;
 	controls.maxDistance = cubeSize * 25;
-	const axes = new THREE.AxesHelper(100);
-	var centerPos = (cubeSize - 1) * 5.5;
-	axes.position.set(centerPos, centerPos, centerPos);
-	scene.add(axes)
+	// const axes = new THREE.AxesHelper(100);
+	// var centerPos = (cubeSize - 1) * 5.5;
+	// axes.position.set(centerPos, centerPos, centerPos);
+	// scene.add(axes)
 	controls.update();
 
 }
@@ -77,6 +78,8 @@ var explanationTextAreaCP = document.getElementById("CPExplanations")
 
 var solutionTextArea = document.getElementById("SolutionState");
 var heightLimit = 200; /* Maximum height: 200px */
+
+var solutionArray = [];
 
 initialState.oninput = function () {
 	updateTextAreaSize();
@@ -98,7 +101,6 @@ export function appendInformation(position, movesString, explanation) {
 
 // OnChange Update Cube to new State by User Input
 function updateInitialInputState(e) {
-	console.log(e.target.value)
 	if (e.target.value == "") {
 		createCube(cubeSize);
 		generateCubeState(cubeSize);
@@ -424,6 +426,9 @@ $(".dropdown-menu").on('click', '.dropdown-item', function (e) {
 	explanationTextAreaCCE.innerHTML = "";
 	explanationTextAreaEP.innerHTML = "";
 	explanationTextAreaCP.innerHTML = "";
+	if(playerDiv.firstChild){
+		playerDiv.removeChild(playerDiv.firstChild)
+	}
 
 });
 
@@ -474,14 +479,12 @@ $("#solveCube").click(function (){
 		onTextSolveSticker(element[1], cubeSize)
 	});
 
-	//Unused Kept for reference
-	// //Solve X-Center Stickers
-	// let xCenterSolution = generateXCenterSolution(cubeSize);
-	// xCenterSolution.forEach(element => {
-	// 	solutionTextArea.value = (solutionTextArea.value + '\n' + element[1])
-	// 	explanationTextArea.value = (explanationTextArea.value + '\n' + element[0])
-	// 	onTextSolveSticker(element[1], cubeSize)
-	// })
+	//Set up for Range Slider for CubeState Representation
+	solutionArray = solutionTextArea.value.split(/\r?\n/);
+	let slider = document.getElementById('myRange')
+	slider.max = solutionArray.length;
+	slider.min = 0;
+	slider.value = 0;
 	updateTextAreaSize()
 })
 
@@ -709,13 +712,43 @@ $("#rotateButton3").click(function () {
 
 
 
-var selectedColor = 0xf0e442;
+var selectedColor = 0x808080;
 var cubeSize = 5;
 
 createCube(cubeSize);
 generateCubeState(cubeSize);
 
-$("#TestButton").click(function () {
+var slide = document.getElementById('myRange');
+var playerDiv = document.getElementById('player');
+
+slide.oninput = function() {
+	let string = initialState.value;
+	let previousString = string;
+	for(let i = 0; i < this.value; i++){
+		previousString = string;
+		string+= " " + solutionArray[i];
+	}
+
+	const player = new TwistyPlayer({
+		puzzle: cubeSize + "x" + cubeSize + "x" + cubeSize,
+		alg: String(solutionArray[this.value - 1]),
+		hintFacelets: "none",
+		background: "none",
+		experimentalSetupAlg: String(previousString),
+	})
+
+	if(playerDiv.firstChild){
+		playerDiv.removeChild(playerDiv.firstChild)
+	}
+	player.id = "playerAnimate";
+	player.style.width = "100%";
+	playerDiv.appendChild(player)
 	
+	onTextInputApplySticker(string, cubeSize)
 	
-})
+}
+
+// Enable ToolTips
+$(function () {
+	$('[data-toggle="tooltip"]').tooltip()
+  })
